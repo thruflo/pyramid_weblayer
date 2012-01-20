@@ -18,7 +18,7 @@ setup(
     description = 'A re-factor of some parts of weblayer for use within Pyramid.',
     author = 'James Arthur',
     author_email = 'username: thruflo, domain: gmail.com',
-    url = 'http://packages.python.org/weblayer',
+    url = 'http://github.com/thruflo/pyramid_weblayer',
     classifiers = [
         'Development Status :: 4 - Beta',
         'Environment :: Web Environment',
