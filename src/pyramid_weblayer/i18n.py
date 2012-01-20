@@ -14,30 +14,6 @@
 
 from pyramid.i18n import get_localizer, TranslationStringFactory
 
-def add_underscore_translation(event):
-    """Add i18n support to the template global namespace.
-      
-      setUp::
-      
-          >>> from mock import Mock
-          >>> mock_request = Mock()
-          >>> mock_request.translate.return_value = 'manger de tout'
-          >>> event = {'request': mock_request}
-      
-      Example usage::
-      
-          >>> add_underscore_translation(event)
-          >>> translate = event['_']
-          >>> translate('eat everything')
-          'manger de tout'
-      
-    """
-    
-    request = event['request']
-    event['_'] = request.translate
-    event['localizer'] = request.localizer
-
-
 class TranslationAdapter(object):
     """Adapt a ``request`` to provide ``self.translate(message_string)``, e.g.::
     
@@ -56,10 +32,37 @@ class TranslationAdapter(object):
     """
     
     def __init__(self, request, domain=None):
-        self._localizer = get_localizer(request)
-        self._factory = TranslationStringFactory(domain)
+        self.localizer = get_localizer(request)
+        self.factory = TranslationStringFactory(domain)
     
     def translate(self, message_string):
-        return self._localizer.translate(self._factory(message_string))
+        return self.localizer.translate(self.factory(message_string))
     
+
+
+def add_underscore_translation(event, Adapter=TranslationAdapter):
+    """Add i18n support to the template global namespace.
+      
+      setUp::
+      
+          >>> from mock import Mock
+          >>> MockAdapter = Mock()
+          >>> mock_translator = Mock()
+          >>> mock_translator.translate.return_value = 'manger de tout'
+          >>> MockAdapter.return_value = mock_translator
+          >>> event = {'request': None}
+      
+      Example usage::
+      
+          >>> add_underscore_translation(event, Adapter=MockAdapter)
+          >>> translate = event['_']
+          >>> translate('eat everything')
+          'manger de tout'
+      
+    """
+    
+    translator = Adapter(event['request'])
+    event['_'] = translator.translate
+    event['localizer'] = translator.localizer
+
 
