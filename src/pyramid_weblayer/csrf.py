@@ -1,21 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Provides ``CSRFValidator``, a utility to validate requests against cross
-  site request forgeries by matching a request param with a session token::
-  
-      validator = CSRFValidator(session_token)
-      try:
-          validator.validate(request)
-      except CSRFError:
-          raise
-  
+"""Provides a ``validate_against_csrf`` ``pyramid.events.NewRequest`` subscriber
+  that uses a ``CSRFValidator`` utility to validate incoming requests against
+  cross site request forgeries.
 """
 
 __all__ = [
     'CSRFError',
     'CSRFValidator'
 ]
+
+from pyramid.httpexceptions import HTTPUnauthorized
 
 METHODS_WITH_SIDE_EFFECTS = (
     'delete',
@@ -39,9 +35,21 @@ class CSRFValidator(object):
             return
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return
-        request_param = request.params.get('csrf_token', None)
-        if request_param is None:
-            raise CSRFError('`csrf_token` missing from %s' % request.method)
-        if request_param != self._session_token:
-            raise CSRFError('`csrf_token` param does not match session token.')
+        request_param = request.params.get('_csrf_token', None)
+        if request_param is None or request_param != self._session_token:
+            raise CSRFError
     
+
+
+def validate_against_csrf(event, Validator=CSRFValidator):
+    """Event subscriber that uses the session to validate incoming requests."""
+    
+    request = event.request
+    if not request.registry.settings.get('csrf_validate', True):
+        return
+    session_token = request.session.get_csrf_token()
+    try:
+        Validator(session_token).validate(request)
+    except CSRFError:
+        raise HTTPUnauthorized
+

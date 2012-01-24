@@ -1,15 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-"""Provides ``CSRFValidator``, a utility to validate requests against cross
-  site request forgeries by matching a request param with a session token::
-  
-      validator = CSRFValidator(session_token)
-      try:
-          validator.validate(request)
-      except CSRFError:
-          raise
-  
+"""Provides an ``add_underscore_translation`` ``pyramid.events.BeforeRender``
+  subscriber that adds a ``_`` translation function to the template global
+  namespace.
 """
 
 from pyramid.i18n import get_localizer, TranslationStringFactory
@@ -64,5 +58,4 @@ def add_underscore_translation(event, Adapter=TranslationAdapter):
     translator = Adapter(event['request'])
     event['_'] = translator.translate
     event['localizer'] = translator.localizer
-
 
