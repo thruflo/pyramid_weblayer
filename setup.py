@@ -14,7 +14,7 @@ def _read(file_name):
 
 setup(
     name = 'pyramid_weblayer',
-    version = '0.3',
+    version = '0.4',
     description = 'A re-factor of some parts of weblayer for use within Pyramid.',
     author = 'James Arthur',
     author_email = 'username: thruflo, domain: gmail.com',
@@ -41,7 +41,10 @@ setup(
     package_dir = {'': 'src'},
     include_package_data = True,
     zip_safe = False,
-    install_requires=['setuptools-git'],
+    install_requires=[
+        'setuptools-git',
+        'passlib'
+    ],
     tests_require = [
         'coverage',
         'nose',
