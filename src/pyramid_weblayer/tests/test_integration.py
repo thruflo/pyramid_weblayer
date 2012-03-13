@@ -72,7 +72,7 @@ class TestCSRF(unittest.TestCase):
         
         app = self.makeOne()
         res = app.get('/r1')
-        res = app.post('/r1', {'_csrf_token': res.body})
+        res = app.post('/r1', {'_csrf': res.body})
         self.failUnless('posted'.encode() in res.body)
     
     def test_csrf_invalid_token(self):
@@ -81,6 +81,6 @@ class TestCSRF(unittest.TestCase):
         app = self.makeOne()
         res = app.post('/r2', status=401)
         self.failUnless('Unauthorized'.encode() in res.body)
-        res = app.post('/r2', {'_csrf_token': 'blah'}, status=401)
+        res = app.post('/r2', {'_csrf': 'blah'}, status=401)
         self.failUnless('Unauthorized'.encode() in res.body)
     

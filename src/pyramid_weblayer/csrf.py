@@ -35,7 +35,7 @@ class CSRFValidator(object):
             return
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
             return
-        request_param = request.params.get('_csrf_token', None)
+        request_param = request.params.get('_csrf', None)
         if request_param is None or request_param != self._session_token:
             raise CSRFError
     

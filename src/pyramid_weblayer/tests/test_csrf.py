@@ -18,20 +18,20 @@ class TestCSRFValidator(unittest.TestCase):
         return CSRFValidator(session_token, **kwargs)
     
     def test_validates_with_correct_request_param(self):
-        """Requests validate OK when they have the correct ``_csrf_token``."""
+        """Requests validate OK when they have the correct ``_csrf``."""
         
         from ..csrf import CSRFError
         
         mock_request = Mock()
         mock_request.method = 'a'
-        mock_request.params = {'_csrf_token': 'token'}
+        mock_request.params = {'_csrf': 'token'}
         
         validator = self.makeOne('token', target_methods=['a'])
         retval = validator.validate(mock_request)
         self.assertTrue(retval is None)
     
     def test_raises_csrf_error_with_no_request_param(self):
-        """Requests must have ``_csrf_token``."""
+        """Requests must have ``_csrf``."""
         
         from ..csrf import CSRFError
         
@@ -47,13 +47,13 @@ class TestCSRFValidator(unittest.TestCase):
         )
     
     def test_raises_csrf_error_with_wrong_request_param(self):
-        """Requests must have the right ``_csrf_token``."""
+        """Requests must have the right ``_csrf``."""
         
         from ..csrf import CSRFError
         
         mock_request = Mock()
         mock_request.method = 'a'
-        mock_request.params = {'_csrf_token': 'wrong'}
+        mock_request.params = {'_csrf': 'wrong'}
         
         validator = self.makeOne('token', target_methods=['a'])
         self.assertRaises(
