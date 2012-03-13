@@ -1,4 +1,8 @@
 
+## 0.5
+
+Renamed `_csrf_token` request parameter to `_csrf` (a more widely used default).
+
 ## 0.4
 
 Added `.auth` module with password `encrypt()` and `verify()` functions.  
