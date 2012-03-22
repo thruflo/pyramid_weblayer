@@ -42,18 +42,12 @@ setup(
     include_package_data = True,
     zip_safe = False,
     install_requires=[
-        'setuptools-git',
-        'passlib'
+        'pyramid',
     ],
     tests_require = [
         'coverage',
         'nose',
         'mock',
         'WebTest>=1.3.1',
-    ],
-    entry_points = {
-        'setuptools.file_finders': [
-            "foo = setuptools_git:gitlsfiles"
-        ],
-    },
+    ]
 )
