@@ -1,8 +1,10 @@
 
 ## 0.6
 
-Remove the `.auth` module (having implemented [pyramid_simpleauth][]).  Removed
-the `passlib` and `setuptools_git` dependencies.
+Remove the `.auth` module (having implemented 
+[pyramid_simpleauth](http://github.com/thruflo/pyramid_simple_auth)).
+
+Removed the `passlib` and `setuptools_git` dependencies.
 
 ## 0.5
 
