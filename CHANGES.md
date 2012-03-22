@@ -1,4 +1,9 @@
 
+## 0.6
+
+Remove the `.auth` module (having implemented [pyramid_simpleauth][]).  Removed
+the `passlib` and `setuptools_git` dependencies.
+
 ## 0.5
 
 Renamed `_csrf_token` request parameter to `_csrf` (a more widely used default).
