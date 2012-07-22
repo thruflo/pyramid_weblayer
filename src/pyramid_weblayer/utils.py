@@ -6,12 +6,22 @@
 """
 
 __all__ = [
-    'generate_hash'
+    'generate_hash',
+    'generate_random_digest',
+    'get_stamp',
+    'datetime_to_float',
 ]
 
+import logging
+logger = logging.getLogger(__name__)
+
 import hashlib
+import os
 import random
 import time
+
+from binascii import hexlify
+from datetime import datetime
 
 def generate_hash(s=None, algorithm='sha512', block_size=512):
     """ Generates a :py:func:`~hashlib.hash.hexdigest` string, either randomly
@@ -111,4 +121,71 @@ def generate_hash(s=None, algorithm='sha512', block_size=512):
     # return a hexdigest of the hash
     return hasher.hexdigest()
     
+
+def generate_random_digest(num_bytes=28):
+    """Generates a random hash and returns the hex digest as a unicode string.
+      
+      Defaults to sha224::
+      
+          >>> import hashlib
+          >>> h = hashlib.sha224()
+          >>> digest = generate_random_digest()
+          >>> len(h.hexdigest()) == len(digest)
+          True
+      
+      Pass in ``num_bytes`` to specify a different length hash::
+      
+          >>> h = hashlib.sha512()
+          >>> digest = generate_random_digest(num_bytes=64)
+          >>> len(h.hexdigest()) == len(digest)
+          True
+      
+      Returns unicode::
+      
+          >>> type(digest) == type(u'')
+          True
+      
+    """
+    
+    r = os.urandom(num_bytes)
+    return unicode(hexlify(r))
+
+def get_stamp(datetime_instance=None, get_now=None):
+    """Return a consistent string format for a datetime.
+      
+      If a ``datetime_instance`` arg is provided, ``str``s it::
+      
+          >>> get_stamp(True)
+          'True'
+      
+      Otherwise defaults to now::
+      
+          >>> now = datetime.utcnow()
+          >>> mock_get_now = lambda: now
+          >>> return_value = get_stamp(get_now=mock_get_now)
+          >>> return_value == str(now)
+          True
+      
+    """
+    
+    if get_now is None:
+        get_now = datetime.utcnow
+    
+    if datetime_instance is None:
+        datetime_instance = get_now()
+    
+    return str(datetime_instance)
+
+def datetime_to_float(datetime_instance):
+    """Convert a datetime to as floating point seconds since the epoch, to
+      millisecond accuracy.
+      
+          >>> datetime_to_float(datetime(2000, 1, 1, 1, 1, 1, 1))
+          946688461.00000095
+      
+    """
+    
+    ts = time.mktime(datetime_instance.timetuple())
+    ts += datetime_instance.microsecond / 1000000.0
+    return ts
 

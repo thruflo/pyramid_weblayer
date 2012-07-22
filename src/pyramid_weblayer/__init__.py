@@ -5,7 +5,7 @@ from pyramid.events import BeforeRender, NewRequest
 
 from .csrf import validate_against_csrf
 from .i18n import add_underscore_translation
-from .utils import generate_hash
+from .utils import *
 
 def includeme(config):
     """Allow developers to use ``config.include('pyramid_weblayer')`` to register
