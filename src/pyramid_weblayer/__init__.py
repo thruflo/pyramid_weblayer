@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-from pyramid.events import BeforeRender, NewRequest, NewResponse
+from pyramid.events import BeforeRender, ContextFound, NewRequest, NewResponse
 
 from .csrf import validate_against_csrf
 from .hsts import hsts_redirect_to_https, set_hsts_header
@@ -32,7 +32,7 @@ def includeme(config):
     """
     
     # CSRF validation.
-    config.add_subscriber(validate_against_csrf, NewRequest)
+    config.add_subscriber(validate_against_csrf, ContextFound)
     
     # Provide `_` template namespace.
     config.add_subscriber(add_underscore_translation, BeforeRender)
