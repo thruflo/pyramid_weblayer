@@ -43,6 +43,7 @@ setup(
     zip_safe = False,
     install_requires=[
         'pyramid',
+        'transaction'
     ],
     tests_require = [
         'coverage',
