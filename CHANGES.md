@@ -1,4 +1,11 @@
 
+## 0.7
+
+* hsts support to add force https
+* tx module with `join_to_transaction` function
+* `had_been_seen` and `session_id` request properties
+* `generate_random_digest`, `get_stamp` and `datetime_to_float` utility functions
+
 ## 0.6
 
 Remove the `.auth` module (having implemented 

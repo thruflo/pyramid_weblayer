@@ -1,30 +1,36 @@
-A re-factor of some elements of [weblayer][] for use within a [Pyramid][] app.
+Common / shared utilities for a [Pyramid][] web application.  (Some originally
+re-factored from the depreciated [weblayer][] micro-framework).
 
-Provides a `validate_against_csrf` subscriber to validate incoming requests
-against cross site request forgeries and an `add_underscore_translation`
-subscriber that extends the template namespace with a `_()` function for
-translating message strings.
+Provides:
+
+* a subscriber to validate incoming requests against cross site request forgeries
+* a subscriber that extends the template namespace with a `_()` function for 
+  translating message strings
+* an `hsts.force_https` configuration flag to force incoming requests to https
+* a `join_to_transaction` function to hang function calls off an after commit hook
+* some misc. request properties and utility functions
 
 ## Tests
 
 The tests pass using Python2.6 and Python3.2, e.g.:
 
-    $ nosetests --cover-package=pyramid_weblayer --cover-tests --with-doctest --with-coverage
-    ............
-    Name                                      Stmts   Miss  Cover   Missing
-    -----------------------------------------------------------------------
-    pyramid_weblayer                              6      0   100%   
-    pyramid_weblayer.csrf                        26      0   100%   
-    pyramid_weblayer.i18n                        12      0   100%   
-    pyramid_weblayer.tests                        0      0   100%   
-    pyramid_weblayer.tests.test_csrf             89      0   100%   
-    pyramid_weblayer.tests.test_integration      58      0   100%   
-    pyramid_weblayer.utils                       19      0   100%   
-    -----------------------------------------------------------------------
-    TOTAL                                       210      0   100%   
+    $ nosetests --with-coverage --with-doctest --cover-package pyramid_weblayer pyramid_weblayer
+    ............................
+    Name                       Stmts   Miss  Cover   Missing
+    --------------------------------------------------------
+    pyramid_weblayer              15      0   100%   
+    pyramid_weblayer.csrf         26      0   100%   
+    pyramid_weblayer.hsts         35      0   100%   
+    pyramid_weblayer.i18n         12      0   100%   
+    pyramid_weblayer.seen         10      0   100%   
+    pyramid_weblayer.session      12      0   100%   
+    pyramid_weblayer.tx           33      0   100%   
+    pyramid_weblayer.utils        37      0   100%   
+    --------------------------------------------------------
+    TOTAL                        180      0   100%   
     ----------------------------------------------------------------------
-    Ran 16 tests in 0.400s
-    
+    Ran 28 tests in 0.430s
+
     OK
 
 [pyramid]: http://pypi.python.org/pypi/pyramid
