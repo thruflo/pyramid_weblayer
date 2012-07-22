@@ -124,17 +124,19 @@ def join_before_transaction(callable_, *args, **kwargs):
       Setup::
       
           >>> from mock import Mock
-          >>> _original = _join_to_transaction
-          >>> _join_to_transaction = Mock()
+          >>> from pyramid_weblayer import tx
+          >>> _original = tx._join_to_transaction
+          >>> tx._join_to_transaction = Mock()
+          >>> tx._join_to_transaction.return_value = None
       
       Test::
       
           >>> join_before_transaction('func', 'arg', kw='')
-          >>> _join_to_transaction.assert_called_with('before', 'func', 'arg', kw='')
+          >>> tx._join_to_transaction.assert_called_with('before', 'func', 'arg', kw='')
       
       Teardown::
       
-          >>> _join_to_transaction = _original
+          >>> tx._join_to_transaction = _original
       
     """
     
@@ -146,17 +148,19 @@ def join_after_transaction(callable_, *args, **kwargs):
       Setup::
       
           >>> from mock import Mock
-          >>> _original = _join_to_transaction
-          >>> _join_to_transaction = Mock()
+          >>> from pyramid_weblayer import tx
+          >>> _original = tx._join_to_transaction
+          >>> tx._join_to_transaction = Mock()
+          >>> tx._join_to_transaction.return_value = None
       
       Test::
       
           >>> join_after_transaction('func', 'arg', kw='')
-          >>> _join_to_transaction.assert_called_with('after', 'func', 'arg', kw='')
+          >>> tx._join_to_transaction.assert_called_with('after', 'func', 'arg', kw='')
       
       Teardown::
       
-          >>> _join_to_transaction = _original
+          >>> tx._join_to_transaction = _original
       
     """
     
