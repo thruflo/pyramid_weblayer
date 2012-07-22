@@ -6,6 +6,8 @@ from pyramid.events import BeforeRender, NewRequest, NewResponse
 from .csrf import validate_against_csrf
 from .hsts import hsts_redirect_to_https, set_hsts_header
 from .i18n import add_underscore_translation
+from .seen import set_seen_cookie, get_has_been_seen
+from .session import get_session_id
 from .utils import *
 
 def includeme(config):
@@ -38,4 +40,11 @@ def includeme(config):
     # Optionally force https://
     config.add_subscriber(hsts_redirect_to_https, NewRequest)
     config.add_subscriber(set_hsts_header, NewResponse)
+    
+    # Has been seen flag.
+    config.add_subscriber(set_seen_cookie, NewResponse)
+    config.set_request_property(get_has_been_seen, 'has_been_seen', reify=True)
+    
+    # Session id.
+    config.set_request_property(get_session_id, 'session_id', reify=True)
 
