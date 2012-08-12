@@ -6,6 +6,7 @@ from pyramid.events import BeforeRender, ContextFound, NewRequest, NewResponse
 from .csrf import validate_against_csrf
 from .hsts import hsts_redirect_to_https, set_hsts_header
 from .i18n import add_underscore_translation
+from .nav import add_is_active_function
 from .seen import set_seen_cookie, get_has_been_seen
 from .session import get_session_id
 from .utils import *
@@ -36,6 +37,7 @@ def includeme(config):
     
     # Provide `_` template namespace.
     config.add_subscriber(add_underscore_translation, BeforeRender)
+    config.add_subscriber(add_is_active_function, BeforeRender)
     
     # Optionally force https://
     config.add_subscriber(hsts_redirect_to_https, NewRequest)
