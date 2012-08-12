@@ -47,4 +47,9 @@ def includeme(config):
     
     # Session id.
     config.set_request_property(get_session_id, 'session_id', reify=True)
+    
+    # Favicon and robots.txt.
+    config.add_route('favicon_ico', 'favicon.ico')
+    config.add_route('robots_txt', 'robots.txt')
+    config.scan('pyramid_weblayer')
 
