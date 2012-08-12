@@ -133,6 +133,7 @@ class TestCSRFSubscriber(unittest.TestCase):
         from ..csrf import validate_against_csrf
         
         mock_request = Mock()
+        mock_request.registry.settings = {}
         mock_validator = Mock()
         mock_validator_factory = Mock()
         mock_validator_factory.return_value = mock_validator
@@ -150,7 +151,7 @@ class TestCSRFSubscriber(unittest.TestCase):
         from ..csrf import validate_against_csrf
         
         mock_request = Mock()
-        mock_request.registry.settings = {'csrf_validate': False}
+        mock_request.registry.settings = {'csrf.validate': False}
         mock_validator = Mock()
         mock_validator_factory = Mock()
         mock_validator_factory.return_value = mock_validator
@@ -174,6 +175,7 @@ class TestCSRFSubscriber(unittest.TestCase):
             raise CSRFError
         
         mock_request = Mock()
+        mock_request.registry.settings = {}
         mock_validator = Mock()
         mock_validator_factory = Mock()
         mock_validator_factory.return_value = mock_validator
