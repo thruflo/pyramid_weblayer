@@ -17,38 +17,57 @@ class ActiveNavigationAdapter(object):
           >>> mock_request = Mock()
           >>> mock_request.path = '/foo/bar'
       
-      Example usage::
+      Returns the string ``'active'`` if True, otherwise returns an empty string::
           
           >>> nav = ActiveNavigationAdapter(mock_request)
           >>> nav.is_active('/foo')
-          True
+          'active'
           >>> nav.is_active('/foo/baz')
-          False
+          ''
+      
+      The idea being that the return value can be used in a html element's class
+      attribute::
+      
+          <li class="nav-item ${is_active('/foo')}">
+            <a href="/foo">Foo</a>
+          </li>
+      
+      Can accept multiple (OR) paths::
+      
+          >>> nav.is_active('/foo/baz', '/flobble', '/bar')
+          ''
+          >>> nav.is_active('/foo/baz', '/foo')
+          'active'
+          >>> nav.is_active('/foo', '/foo/baz')
+          'active'
       
       Special cases '/' to require an exact match::
       
           >>> nav.is_active('/')
-          False
-      
+          ''
           >>> mock_request.path = '/'
           >>> nav = ActiveNavigationAdapter(mock_request)
           >>> nav.is_active('/')
-          True
+          'active'
       
     """
     
     def __init__(self, request):
         self.request = request
     
-    def is_active(self, path, exact=None):
-        if exact is None:
-            exact = path == '/'
-        active = False
-        if exact:
-            active = self.request.path == path
-        else:
-            active = self.request.path.startswith(path)
-        return 'active' if active else ''
+    def is_active(self, *args, **kwargs):
+        exact = kwargs.get('exact')
+        for path in args:
+            if exact is None:
+                exact = path == '/'
+            active = False
+            if exact:
+                active = self.request.path == path
+            else:
+                active = self.request.path.startswith(path)
+            if active:
+                return 'active'
+        return ''
     
 
 
@@ -60,7 +79,7 @@ def add_is_active_function(event, adapter_cls=None):
           >>> from mock import Mock
           >>> mock_adapter_cls = Mock()
           >>> mock_adapter = Mock()
-          >>> mock_adapter.is_active_return_value = True
+          >>> mock_adapter.is_active.return_value = True
           >>> mock_adapter_cls.return_value = mock_adapter
           >>> event = {'request': None}
       
@@ -70,7 +89,7 @@ def add_is_active_function(event, adapter_cls=None):
           >>> is_active = event['is_active']
           >>> is_active('/')
           True
-          >>> mock_nav.is_active.assert_called_with('/')
+          >>> mock_adapter.is_active.assert_called_with('/')
       
     """
     
