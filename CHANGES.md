@@ -1,4 +1,8 @@
 
+## 0.8
+
+Provide `nav` module to add `is_active` to the template namespace.
+
 ## 0.7
 
 * hsts support to add force https
