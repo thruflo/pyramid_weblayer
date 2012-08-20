@@ -15,20 +15,51 @@ def includeme(config):
     """Allow developers to use ``config.include('pyramid_weblayer')`` to register
       the ``add_underscore_translation`` subscriber::
       
-      setUp::
+      Setup::
       
           >>> from mock import Mock
           >>> mock_config = Mock()
-      
-      test::
-      
           >>> includeme(mock_config)
-          >>> expected = (validate_against_csrf, NewRequest)
-          >>> mock_config.add_subscriber.call_args_list[0][0] == expected 
-          True
-          >>> expected = (add_underscore_translation, BeforeRender)
-          >>> mock_config.add_subscriber.call_args_list[1][0] == expected
-          True
+      
+      CSRF validation::
+      
+          >>> mock_config.add_subscriber.assert_any_call(validate_against_csrf, 
+          ...         ContextFound)
+      
+      Provide `_` template namespace::
+      
+          >>> mock_config.add_subscriber.assert_any_call(add_underscore_translation,
+          ...         BeforeRender)
+          >>> mock_config.add_subscriber.assert_any_call(add_is_active_function,
+          ...         BeforeRender)
+      
+      Optionally force https::
+      
+          >>> mock_config.add_subscriber.assert_any_call(hsts_redirect_to_https, 
+          ...         NewRequest)
+          >>> mock_config.add_subscriber.assert_any_call(set_hsts_header, 
+          ...         NewResponse)
+      
+      Has been seen flag.::
+      
+          >>> mock_config.add_subscriber.assert_any_call(set_seen_cookie, 
+          ...         NewResponse)
+          >>> mock_config.set_request_property.assert_any_call(get_has_been_seen,
+          ...         'has_been_seen', reify=True)
+      
+      Session ID::
+      
+          >>> mock_config.set_request_property.assert_any_call(get_session_id, 
+          ...         'session_id', reify=True)
+      
+      Prereq routes::
+      
+          >>> mock_config.add_route.assert_any_call('favicon_ico', 'favicon.ico')
+          >>> mock_config.add_route.assert_any_call('robots_txt', 'robots.txt')
+      
+      Scan::
+      
+          >>> mock_config.scan.assert_called_with('pyramid_weblayer')
       
     """
     
