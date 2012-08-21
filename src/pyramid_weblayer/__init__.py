@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from pyramid.events import BeforeRender, ContextFound, NewRequest, NewResponse
+from pyramid.settings import asbool
 
 from .csrf import validate_against_csrf
 from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
@@ -73,9 +74,12 @@ def includeme(config):
     config.add_subscriber(add_is_active_function, BeforeRender)
     
     # Optionally force https://
-    config.add_subscriber(hsts_redirect_to_https, NewRequest)
-    config.add_subscriber(set_hsts_header, NewResponse)
-    config.set_request_property(secure_route_url, 'route_url', reify=True)
+    settings = config.registry.settings
+    should_force_https = asbool(settings.get('hsts.force_https', False))
+    if should_force_https:
+        config.add_subscriber(hsts_redirect_to_https, NewRequest)
+        config.add_subscriber(set_hsts_header, NewResponse)
+        config.set_request_property(secure_route_url, 'route_url', reify=True)
     
     # Has been seen flag.
     config.add_subscriber(set_seen_cookie, NewResponse)

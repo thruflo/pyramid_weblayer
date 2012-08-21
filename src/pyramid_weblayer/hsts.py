@@ -166,11 +166,6 @@ def secure_route_url(request, request_cls=None, parse_url=None):
     # Cache the original ``request.route_url`` method.
     original_route_url = request_cls(request.environ).route_url
     
-    # Use the original unless told to enforce https.
-    should_force_https = asbool(settings.get('hsts.force_https', False))
-    if not should_force_https:
-        return original_route_url
-    
     def route_url(*args, **kwargs):
         """Get the original ``route_url``.  Force it to use a secure protocol."""
         
