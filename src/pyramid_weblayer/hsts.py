@@ -175,9 +175,10 @@ def secure_route_url(request, request_cls=None, parse_url=None):
         # If it's not secure, append an ``s`` to the protocol.
         parsed = parse_url(url)
         protocol = parsed.scheme
-        if not protocol.endswith('s'):
-            secure_protocol = '{0}s'.format(protocol)
-            url = url.replace(protocol, secure_protocol, 1)
+        if protocol and not protocol.endswith('s'):
+            original_protocol = '{0}://'.format(protocol)
+            secure_protocol = '{0}s://'.format(protocol)
+            url = url.replace(original_protocol, secure_protocol, 1)
         
         # Return the url.
         return url
