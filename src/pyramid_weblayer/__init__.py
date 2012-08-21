@@ -4,7 +4,7 @@
 from pyramid.events import BeforeRender, ContextFound, NewRequest, NewResponse
 
 from .csrf import validate_against_csrf
-from .hsts import hsts_redirect_to_https, set_hsts_header
+from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
 from .i18n import add_underscore_translation
 from .nav import add_is_active_function
 from .seen import set_seen_cookie, get_has_been_seen
@@ -39,6 +39,8 @@ def includeme(config):
           ...         NewRequest)
           >>> mock_config.add_subscriber.assert_any_call(set_hsts_header, 
           ...         NewResponse)
+          >>> mock_config.set_request_property.assert_any_call(secure_route_url,
+          ...         'route_url', reify=True)
       
       Has been seen flag.::
       
@@ -73,6 +75,7 @@ def includeme(config):
     # Optionally force https://
     config.add_subscriber(hsts_redirect_to_https, NewRequest)
     config.add_subscriber(set_hsts_header, NewResponse)
+    config.set_request_property(secure_route_url, 'route_url', reify=True)
     
     # Has been seen flag.
     config.add_subscriber(set_seen_cookie, NewResponse)

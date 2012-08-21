@@ -8,7 +8,10 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import urlparse
+
 from pyramid.httpexceptions import HTTPFound, HTTPForbidden
+from pyramid.request import Request
 from pyramid.settings import asbool
 
 def hsts_redirect_to_https(event):
@@ -146,4 +149,43 @@ def set_hsts_header(event):
         if include_subdomains:
             value += ' includeSubDomains'
         response.headers.add('Strict-Transport-Security', value)
+
+def secure_route_url(request, request_cls=None, parse_url=None):
+    """Overrides ``route_url`` to make sure the protocol of the resulting
+      link is secure.  This makes sure that the ``route_url`` function of
+      a secure app running behind an https front end can't mistakenly
+      output http links (for example).
+    """
+    
+    # Test jig.
+    if request_cls is None:
+        request_cls = Request
+    if parse_url is None:
+        parse_url = urlparse.urlparse
+    
+    # Cache the original ``request.route_url`` method.
+    original_route_url = request_cls(request.environ).route_url
+    
+    # Use the original unless told to enforce https.
+    should_force_https = asbool(settings.get('hsts.force_https', False))
+    if not should_force_https:
+        return original_route_url
+    
+    def route_url(*args, **kwargs):
+        """Get the original ``route_url``.  Force it to use a secure protocol."""
+        
+        # Get the original url.
+        url = original_route_url(*args, **kwargs)
+        
+        # If it's not secure, append an ``s`` to the protocol.
+        parsed = parse_url(url)
+        protocol = parsed.scheme
+        if not protocol.endswith('s'):
+            secure_protocol = '{0}s'.format(protocol)
+            url = url.replace(protocol, secure_protocol, 1)
+        
+        # Return the url.
+        return url
+    
+    return route_url
 
