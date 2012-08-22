@@ -17,18 +17,18 @@
     % endif
     <div class="controls">
       ${getattr(renderer, field_type)(name, **kwargs)}
-      <span class="help help-${help_position}">
+      <div class="help help-${help_position}">
         % if help:
           ${help}
         % endif
-        <span class="field-error">
+        <div class="field-error">
           % if renderer.errors_for(name):
             % for error_message in renderer.errors_for(name):
-              ${error_message}
+              ${error_message}.
             % endfor
           % endif
-        </span>
-      </span>
+        </div>
+      </div>
     </div>
   </div>
 </%def>
