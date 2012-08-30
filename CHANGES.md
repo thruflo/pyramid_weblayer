@@ -1,4 +1,13 @@
 
+## 0.8.3
+
+Added `fileupload` template def.
+
+## 0.8.2
+
+Override ``request.route_url`` to force urls to use a secure protocol when
+force https is enabled.
+
 ## 0.8
 
 Provide `nav` module to add `is_active` to the template namespace.
