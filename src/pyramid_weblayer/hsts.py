@@ -14,6 +14,22 @@ from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 from pyramid.request import Request
 from pyramid.settings import asbool
 
+def ensure_secure_url(url, parse_url=None):
+    """Add an ``s`` to the ``url`` protocol, if necessary."""
+    
+    if parse_url is None:
+        parse_url = urlparse.urlparse
+    
+    # If it's not secure, append an ``s`` to the protocol.
+    parsed = parse_url(url)
+    protocol = parsed.scheme
+    if protocol and not protocol.endswith('s'):
+        original_protocol = '{0}://'.format(protocol)
+        secure_protocol = '{0}s://'.format(protocol)
+        url = url.replace(original_protocol, secure_protocol, 1)
+    return url
+
+
 def hsts_redirect_to_https(event):
     """Redirects `http://` GET requests to `https://` and blocks non `https://`
       requests to other request methods.
@@ -150,7 +166,7 @@ def set_hsts_header(event):
             value += ' includeSubDomains'
         response.headers.add('Strict-Transport-Security', value)
 
-def secure_route_url(request, request_cls=None, parse_url=None):
+def secure_route_url(request, request_cls=None, secure_url=None):
     """Overrides ``route_url`` to make sure the protocol of the resulting
       link is secure.  This makes sure that the ``route_url`` function of
       a secure app running behind an https front end can't mistakenly
@@ -160,8 +176,8 @@ def secure_route_url(request, request_cls=None, parse_url=None):
     # Test jig.
     if request_cls is None:
         request_cls = Request
-    if parse_url is None:
-        parse_url = urlparse.urlparse
+    if secure_url is None:
+        secure_url = ensure_secure_url
     
     # Cache the original ``request.route_url`` method.
     original_route_url = request_cls(request.environ).route_url
@@ -172,16 +188,8 @@ def secure_route_url(request, request_cls=None, parse_url=None):
         # Get the original url.
         url = original_route_url(*args, **kwargs)
         
-        # If it's not secure, append an ``s`` to the protocol.
-        parsed = parse_url(url)
-        protocol = parsed.scheme
-        if protocol and not protocol.endswith('s'):
-            original_protocol = '{0}://'.format(protocol)
-            secure_protocol = '{0}s://'.format(protocol)
-            url = url.replace(original_protocol, secure_protocol, 1)
-        
-        # Return the url.
-        return url
+        # Return the secured version.
+        return secure_url(url)
     
     return route_url
 
