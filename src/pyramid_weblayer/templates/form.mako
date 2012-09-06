@@ -34,7 +34,7 @@
 </%def>
 
 <%def name="field(renderer, field_type, name, label=None, help=None, 
-        help_position='inline', required=False, **kwargs)">
+        help_position='inline', required=False, extra_markup=None, **kwargs)">
   <div class="control-group ${name}-control ${renderer.is_error(name) and 'error' or ''}">
     % if label is not False:
       <%
@@ -52,6 +52,9 @@
     % endif
     <div class="controls">
       ${getattr(renderer, field_type)(name, **kwargs)}
+      % if extra_markup:
+        ${extra_markup | n}
+      % endif
       <div class="help help-${help_position}">
         % if help:
           ${help}
