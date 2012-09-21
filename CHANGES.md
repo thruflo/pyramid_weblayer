@@ -1,4 +1,8 @@
 
+## 0.8.4
+
+Added Redis ``queue.QueueProcessor``.
+
 ## 0.8.3
 
 Added `fileupload` template def.
