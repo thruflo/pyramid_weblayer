@@ -5,7 +5,7 @@
   
       >>> redis_client = '<redis.Redis> instance'
       >>> input_channels = ['channel1', 'channeln']
-      >>> handle_data = lambda data_str: print data_str
+      >>> handle_data = lambda data_str: data_str
       >>> processor = QueueProcessor(redis_client, input_channels, handle_data)
   
   Run in the main / current thread::

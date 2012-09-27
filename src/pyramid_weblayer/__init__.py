@@ -37,6 +37,8 @@ def includeme(config):
       
       Optionally force https::
       
+          >>> mock_config.registry.settings = {'hsts.force_https': True}
+          >>> includeme(mock_config)
           >>> mock_config.add_subscriber.assert_any_call(hsts_redirect_to_https, 
           ...         NewRequest)
           >>> mock_config.add_subscriber.assert_any_call(set_hsts_header, 
