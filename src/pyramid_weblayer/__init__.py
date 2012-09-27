@@ -4,6 +4,7 @@
 from pyramid.events import BeforeRender, ContextFound, NewRequest, NewResponse
 from pyramid.settings import asbool
 
+from .campaign import get_campaign_url
 from .csrf import validate_against_csrf
 from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
 from .i18n import add_underscore_translation
@@ -87,6 +88,9 @@ def includeme(config):
     
     # Session id.
     config.set_request_property(get_session_id, 'session_id', reify=True)
+    
+    # Provide ``request.campaign_url``.
+    config.set_request_property(get_campaign_url, 'campaign_url', reify=True)
     
     # Favicon and robots.txt.
     config.add_route('favicon_ico', 'favicon.ico')
