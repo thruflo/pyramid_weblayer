@@ -28,7 +28,7 @@ def get_campaign_url(request):
             query['utm_content'] = content
         if campaign:
             query['utm_campaign'] = campaign
-        return request.route_url(spec, _query=query)
+        return request.route_url(spec, _query=query, **kwargs)
     
     return campaign_url
 
