@@ -1,5 +1,5 @@
 <%def name="field(renderer, field_type, name, label=None, help=None,
-        help_position='inline', required=False, add_on=None, 
+        help_position='inline', required=False, add_on=None, add_on_position='prepend',
         extra_markup=None,**kwargs)">
   <div class="control-group ${name}-control ${renderer.is_error(name) and 'error' or ''}">
     % if label is not False:
@@ -16,9 +16,9 @@
         % endif
       </label>
     % endif
-    <div class="controls">
+    <div class="controls ${'input-{0}'.format(add_on_position) if add_on else ''}">
       % if add_on is not None:
-        <span class="add-on">${add_on}</span>
+        <span class="add-on">${add_on | n}</span>
       % endif
       ${getattr(renderer, field_type)(name, **kwargs)}
       % if extra_markup:
