@@ -75,6 +75,8 @@ class QueueProcessor(object):
                         logger.warn(return_value)
                         if self.should_requeue:
                             self.redis.rpush(channel, body)
+                if self.reconnect_delay:
+                    time.sleep(self.reconnect_delay)
     
     def start(self, async=False):
         """Either start running or start running in a thread."""
@@ -88,7 +90,7 @@ class QueueProcessor(object):
             self._start()
     
     def __init__(self, redis_client, channels, handle_function, timeout=5,
-            should_requeue=False):
+            reconnect_delay=0.005, should_requeue=False):
         """Instantiate a queue processor::
           
               >>> processor = QueueProcessor(None, None, None)
@@ -99,6 +101,7 @@ class QueueProcessor(object):
         self.channels = channels
         self.handle_function = handle_function
         self.timeout = timeout
+        self.reconnect_delay = reconnect_delay
         self.should_requeue = should_requeue
     
 
