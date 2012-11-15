@@ -55,17 +55,19 @@ class QueueProcessor(object):
     def _start(self):
         """Actually start processing the input queue(s) ad-infinitum."""
         
-        logger.debug('QueueProcessor.start()')
-        logger.debug(self.channels)
+        logger.info('QueueProcessor.start()')
+        logger.info(self.channels)
         
         self.running = True
         while self.running:
+            logger.debug(('QueueProcessor reconnecting', self.channels))
             try:
                 return_value = self.redis.blpop(self.channels, timeout=self.timeout)
             except Exception as err:
                 logger.warn(err, exc_info=True)
                 time.sleep(self.timeout)
             else:
+                logger.debug('QueueProcessor return value obtained')
                 if return_value is not None:
                     channel, body = return_value
                     try:
