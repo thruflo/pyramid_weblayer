@@ -67,7 +67,7 @@ class QueueProcessor(object):
                 logger.warn(err, exc_info=True)
                 time.sleep(self.timeout)
             else:
-                logger.debug('QueueProcessor return value obtained')
+                logger.debug(('QueueProcessor return value obtained', self.channels))
                 if return_value is not None:
                     channel, body = return_value
                     try:
