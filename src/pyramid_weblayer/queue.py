@@ -91,7 +91,7 @@ class QueueProcessor(object):
         else:
             self._start()
     
-    def __init__(self, redis_client, channels, handle_function, timeout=5,
+    def __init__(self, redis_client, channels, handle_function, timeout=20,
             reconnect_delay=0.005, should_requeue=False):
         """Instantiate a queue processor::
           
