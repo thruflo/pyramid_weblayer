@@ -1,4 +1,8 @@
 
+## 0.8.5
+
+Added ``snip_text`` and ``snip_html`` functions to template namespace.
+
 ## 0.8.4
 
 Added Redis ``queue.QueueProcessor``.
