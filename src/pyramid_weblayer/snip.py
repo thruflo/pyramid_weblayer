@@ -18,7 +18,15 @@ def snip_text(text, n=140):
           >>> snip_text(u'lorum ipsum dolores', n=8)
           u'lorum \u2026'
       
+      Anything that evaluates to False comes out as an empty string::
+      
+          >>> snip_text(None)
+          u''
+      
     """
+    
+    if not text:
+        return u''
     
     if len(text) < n:
         return text
