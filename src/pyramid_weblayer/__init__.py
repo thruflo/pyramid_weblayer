@@ -11,6 +11,7 @@ from .i18n import add_underscore_translation
 from .nav import add_is_active_function
 from .seen import set_seen_cookie, get_has_been_seen
 from .session import get_session_id
+from .snip import add_snip_functions
 from .utils import *
 
 def includeme(config):
@@ -33,6 +34,11 @@ def includeme(config):
           >>> mock_config.add_subscriber.assert_any_call(add_underscore_translation,
           ...         BeforeRender)
           >>> mock_config.add_subscriber.assert_any_call(add_is_active_function,
+          ...         BeforeRender)
+      
+      Add snip functions to template namespace::
+      
+          >>> mock_config.add_subscriber.assert_any_call(add_snip_functions,
           ...         BeforeRender)
       
       Optionally force https::
@@ -75,6 +81,9 @@ def includeme(config):
     # Provide `_` template namespace.
     config.add_subscriber(add_underscore_translation, BeforeRender)
     config.add_subscriber(add_is_active_function, BeforeRender)
+    
+    # Add snip functions to the template namespace.
+    config.add_subscriber(add_snip_functions, BeforeRender)
     
     # Optionally force https://
     settings = config.registry.settings
