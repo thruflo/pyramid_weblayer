@@ -6,6 +6,7 @@ from pyramid.settings import asbool
 
 from .campaign import get_campaign_url
 from .csrf import validate_against_csrf
+from .flash import get_joined_flash
 from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
 from .i18n import add_underscore_translation
 from .nav import add_is_active_function
@@ -64,6 +65,11 @@ def includeme(config):
           >>> mock_config.set_request_property.assert_any_call(get_session_id, 
           ...         'session_id', reify=True)
       
+      Joined session flash::
+      
+          >>> mock_config.set_request_property.assert_any_call(get_joined_flash, 
+          ...         'joined_flash', reify=True)
+      
       Prereq routes::
       
           >>> mock_config.add_route.assert_any_call('favicon_ico', 'favicon.ico')
@@ -102,6 +108,9 @@ def includeme(config):
     
     # Provide ``request.campaign_url``.
     config.set_request_property(get_campaign_url, 'campaign_url', reify=True)
+    
+    # Provide ``request.joined_flash``.
+    config.set_request_property(get_joined_flash, 'joined_flash', reify=True)
     
     # Favicon and robots.txt.
     config.add_route('favicon_ico', 'favicon.ico')
