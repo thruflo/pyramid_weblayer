@@ -25,4 +25,5 @@ def get_joined_flash(request, join=None):
         
         return join(request.session.flash, *args, **kwargs)
     
+    return joined_flash
 
