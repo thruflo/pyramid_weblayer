@@ -11,6 +11,7 @@ from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
 from .i18n import add_underscore_translation
 from .nav import add_is_active_function
 from .seen import set_seen_cookie, get_has_been_seen
+from .serve import get_serve_spec
 from .session import get_session_id
 from .snip import add_snip_functions
 from .utils import *
@@ -111,6 +112,9 @@ def includeme(config):
     
     # Provide ``request.joined_flash``.
     config.set_request_property(get_joined_flash, 'joined_flash', reify=True)
+    
+    # Provide ``request.serve_spec``.
+    config.set_request_property(get_serve_spec, 'serve_spec', reify=True)
     
     # Favicon and robots.txt.
     config.add_route('favicon_ico', 'favicon.ico')
