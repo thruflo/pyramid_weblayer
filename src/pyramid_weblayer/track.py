@@ -44,8 +44,12 @@ def get_track_event(request, join=None, event_cls=None, session_cls=None,
           to the current transaction.
         """
         
-        # Prepare the tracking id, session id and utm cookies.
+        # Exit if in development.
         settings = request.registry.settings
+        if settings.get('mode', None) == 'development':
+            return
+        
+        # Prepare the tracking id, session id and utm cookies.
         gae_tracking_id = settings['gae.tracking_id']
         if not 'gae_session_id' in request.session:
             request.session['gae_session_id'] = session_cls.generate_session_id()
