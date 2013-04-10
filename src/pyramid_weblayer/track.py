@@ -72,7 +72,7 @@ def get_track_event(request, join=None, event_cls=None, session_cls=None,
         
         # Join a background call to track the event to the current transaction.
         track_event = lambda: tracker.track_event(event, session, visitor)
-        thread = thread_cls(target=track_event).start
+        thread = thread_cls(target=track_event)
         return join(thread.start)
     
     return track_event
