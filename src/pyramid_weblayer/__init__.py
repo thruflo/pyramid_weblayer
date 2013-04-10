@@ -14,6 +14,7 @@ from .seen import set_seen_cookie, get_has_been_seen
 from .serve import get_serve_spec
 from .session import get_session_id
 from .snip import add_snip_functions
+from .track import get_track_event
 from .utils import *
 
 def includeme(config):
@@ -71,6 +72,12 @@ def includeme(config):
           >>> mock_config.set_request_property.assert_any_call(get_joined_flash, 
           ...         'joined_flash', reify=True)
       
+      Track event::
+      
+          >>> mock_config.set_request_property.assert_any_call(get_track_event, 
+          ...         'track_event', reify=True)
+      
+      
       Prereq routes::
       
           >>> mock_config.add_route.assert_any_call('favicon_ico', 'favicon.ico')
@@ -115,6 +122,9 @@ def includeme(config):
     
     # Provide ``request.serve_spec``.
     config.set_request_property(get_serve_spec, 'serve_spec', reify=True)
+    
+    # Provide ``request.track_event``.
+    config.set_request_property(get_track_event, 'track_event', reify=True)
     
     # Favicon and robots.txt.
     config.add_route('favicon_ico', 'favicon.ico')

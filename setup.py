@@ -43,6 +43,7 @@ setup(
     zip_safe = False,
     install_requires=[
         'html2text',
+        'pyga',
         'pyramid',
         'transaction'
     ],
