@@ -7,8 +7,10 @@ from pyramid.settings import asbool
 from .campaign import get_campaign_url
 from .csrf import validate_against_csrf
 from .flash import get_joined_flash
+from .flat import add_flatten_functions
 from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
 from .i18n import add_underscore_translation
+from .markdown import markdown_to_html
 from .nav import add_is_active_function
 from .seen import set_seen_cookie, get_has_been_seen
 from .serve import get_serve_spec
@@ -39,8 +41,10 @@ def includeme(config):
           >>> mock_config.add_subscriber.assert_any_call(add_is_active_function,
           ...         BeforeRender)
       
-      Add snip functions to template namespace::
+      Add flatten and snip functions to template namespace::
       
+          >>> mock_config.add_subscriber.assert_any_call(add_flatten_functions,
+          ...         BeforeRender)
           >>> mock_config.add_subscriber.assert_any_call(add_snip_functions,
           ...         BeforeRender)
       
@@ -72,6 +76,11 @@ def includeme(config):
           >>> mock_config.set_request_property.assert_any_call(get_joined_flash, 
           ...         'joined_flash', reify=True)
       
+      Markdown rendering::
+      
+          >>> mock_config.set_request_property.assert_any_call(markdown_to_html, 
+          ...         'markdown_to_html', reify=True)
+      
       Track event::
       
           >>> mock_config.set_request_property.assert_any_call(get_track_event, 
@@ -96,7 +105,8 @@ def includeme(config):
     config.add_subscriber(add_underscore_translation, BeforeRender)
     config.add_subscriber(add_is_active_function, BeforeRender)
     
-    # Add snip functions to the template namespace.
+    # Add snip and flatten functions to the template namespace.
+    config.add_subscriber(add_flatten_functions, BeforeRender)
     config.add_subscriber(add_snip_functions, BeforeRender)
     
     # Optionally force https://
@@ -119,6 +129,9 @@ def includeme(config):
     
     # Provide ``request.joined_flash``.
     config.set_request_property(get_joined_flash, 'joined_flash', reify=True)
+    
+    # Provide ``request.markdown_to_html``.
+    config.set_request_property(markdown_to_html, 'markdown_to_html', reify=True)
     
     # Provide ``request.serve_spec``.
     config.set_request_property(get_serve_spec, 'serve_spec', reify=True)
