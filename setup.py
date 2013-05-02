@@ -46,7 +46,9 @@ setup(
         'markdown2',
         'pyga',
         'pyramid',
-        'transaction'
+        'pyramid_basemodel',
+        'transaction',
+        'zope.interface'
     ],
     tests_require = [
         'coverage',
