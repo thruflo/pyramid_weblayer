@@ -48,6 +48,8 @@ def get_serve_spec(request, requests=None, buf_cls=None, iter_cls=None,
         
         # Resolve the spec to a url.
         url = request.static_url(spec)
+        if url.startswith('//'):
+            url = 'https:' + url
         
         # Download the url.
         r = requests.get(url, stream=True)
