@@ -52,17 +52,10 @@ def get_serve_spec(request, requests=None, buf_cls=None, iter_cls=None,
             url = 'https:' + url
         
         # Download the url.
-        r = requests.get(url, stream=True)
+        r = requests.get(url)
         if r.status_code != requests.codes.ok:
             msg = not_found_msg if r.status_code == 404 else err_message
             return not_found(explanation=msg)
-        
-        # Streaming it into a response buffer.
-        buf = buf_cls()
-        for line in r.iter_lines():
-            if line:
-                buf.write(line)
-        buf.seek(0)
         
         # Return the file response.
         filename = spec.split('/')[-1]
@@ -70,7 +63,7 @@ def get_serve_spec(request, requests=None, buf_cls=None, iter_cls=None,
         mime_type = mimetypes.guess_type(filename)[0] or 'application/octet-stream'
         response = Response(content_type=mime_type)
         response.headers['Content-Disposition'] = disposition
-        response.app_iter = FileIter(buf)
+        response.body = r.content
         return response
     
     
