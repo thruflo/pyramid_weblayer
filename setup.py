@@ -15,7 +15,7 @@ def _read(file_name):
 setup(
     name = 'pyramid_weblayer',
     version = '0.8.5',
-    description = 'A re-factor of some parts of weblayer for use within Pyramid.',
+    description = 'Common / reusable utilities for a Pyramid web application.',
     author = 'James Arthur',
     author_email = 'username: thruflo, domain: gmail.com',
     url = 'http://github.com/thruflo/pyramid_weblayer',
