@@ -18,25 +18,17 @@ Read the source for more info.
 
 ## Tests
 
-The tests pass using Python2.6 and Python3.2, e.g.:
+I tend to add things too fast to keep 100% coverage and test against multiple
+Python versions. So expect code to be tested against python2.7 and to have
+decent but not exhaustive coverage. Patches to increase compatibility and
+coverage are very welcome.
 
-    $ nosetests --with-coverage --with-doctest --cover-package pyramid_weblayer pyramid_weblayer
-    ............................
-    Name                       Stmts   Miss  Cover   Missing
-    --------------------------------------------------------
-    pyramid_weblayer              15      0   100%   
-    pyramid_weblayer.csrf         26      0   100%   
-    pyramid_weblayer.hsts         35      0   100%   
-    pyramid_weblayer.i18n         12      0   100%   
-    pyramid_weblayer.seen         10      0   100%   
-    pyramid_weblayer.session      12      0   100%   
-    pyramid_weblayer.tx           33      0   100%   
-    pyramid_weblayer.utils        37      0   100%   
-    --------------------------------------------------------
-    TOTAL                        180      0   100%   
-    ----------------------------------------------------------------------
-    Ran 28 tests in 0.430s
+To run the tests, `pip install mock nose coverage WebTest` and e.g.:
 
+    $ nosetests pyramid_weblayer --with-doctest --with-coverage --cover-tests --cover-package pyramid_weblayer
+    ...
+    Ran 40 tests in 0.297s
+    
     OK
 
 [pyramid]: http://pypi.python.org/pypi/pyramid
