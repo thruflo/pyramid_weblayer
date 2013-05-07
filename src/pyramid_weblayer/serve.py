@@ -5,7 +5,14 @@
   
       # E.g. in a view callable
       return request.serve_spec('mypkg:foo/bar.js')
-      
+  
+  Note that the implementation gets the file using its static url, so
+  this is only really useful as a way to *obfuscate* the actual url
+  that a file is downloaded from, i.e.: if you want to proxy a
+  download so as not to expose the actual url to the file.
+  
+  Note also that this obfuscation is only itself useful if the downloaded
+  file is served over HTTPS and has an unguessable file path.
 """
 
 import logging
