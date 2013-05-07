@@ -1,4 +1,8 @@
 
+## 0.9
+
+Improved docs.
+
 ## 0.8.5
 
 Added ``snip_text`` and ``snip_html`` functions to template namespace.
