@@ -1,4 +1,9 @@
 
+## 0.10
+
+Secure the `request.application_url` property, in the same way we secure the
+`request.route_url` method, when HSTS is enabled.
+
 ## 0.9.2
 
 0.9.1 was a brown bag: the sdist was missing the form.mako template.
