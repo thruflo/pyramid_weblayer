@@ -1,4 +1,8 @@
 
+## 0.10.1
+
+And complete the set with a secured `request.resource_url` when HSTS is enabled.
+
 ## 0.10
 
 Secure the `request.application_url` property, in the same way we secure the
