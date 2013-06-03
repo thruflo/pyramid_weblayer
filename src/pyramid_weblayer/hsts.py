@@ -189,19 +189,6 @@ def secure_request_url(request, method_name, request_cls=None, secure_url=None):
     # Otherwise return a secured method.
     return lambda *args, **kwargs: secure_url(original(*args, **kwargs))
 
-def secure_route_url(request, secure_url=None):
-    """Overrides ``route_url`` to make sure the protocol of the resulting
-      link is secure.  This makes sure that the ``route_url`` function of
-      a secure app running behind an https front end can't mistakenly
-      output http links (for example).
-    """
-    
-    # Test jig.
-    if secure_url is None:
-        secure_url = secure_request_url
-    
-    return secure_url(request, 'route_url')
-
 def secure_application_url(request, secure_url=None):
     """Overrides ``application_url`` to make sure the protocol is secure."""
     
@@ -210,4 +197,23 @@ def secure_application_url(request, secure_url=None):
         secure_url = secure_request_url
     
     return secure_url(request, 'application_url')
+
+def secure_resource_url(request, secure_url=None):
+    """Overrides ``resource_url`` to make sure the link is secure."""
+    
+    # Test jig.
+    if secure_url is None:
+        secure_url = secure_request_url
+
+    return secure_url(request, 'resource_url')
+
+
+def secure_route_url(request, secure_url=None):
+    """Overrides ``route_url`` to make sure the link is secure."""
+    
+    # Test jig.
+    if secure_url is None:
+        secure_url = secure_request_url
+    
+    return secure_url(request, 'route_url')
 
