@@ -8,11 +8,15 @@ from .campaign import get_campaign_url
 from .csrf import validate_against_csrf
 from .flash import get_joined_flash
 from .flat import add_flatten_functions
-from .hsts import hsts_redirect_to_https, set_hsts_header, secure_route_url
+from .hsts import hsts_redirect_to_https
+from .hsts import set_hsts_header
+from .hsts import secure_route_url
+from .hsts import secure_application_url
 from .i18n import add_underscore_translation
 from .markdown import markdown_to_html
 from .nav import add_is_active_function
-from .seen import set_seen_cookie, get_has_been_seen
+from .seen import set_seen_cookie
+from .seen import get_has_been_seen
 from .serve import get_serve_spec
 from .session import get_session_id
 from .snip import add_snip_functions
@@ -116,6 +120,8 @@ def includeme(config):
         config.add_subscriber(hsts_redirect_to_https, NewRequest)
         config.add_subscriber(set_hsts_header, NewResponse)
         config.set_request_property(secure_route_url, 'route_url', reify=True)
+        config.set_request_property(secure_application_url, 'application_url',
+                reify=True)
     
     # Has been seen flag.
     config.add_subscriber(set_seen_cookie, NewResponse)

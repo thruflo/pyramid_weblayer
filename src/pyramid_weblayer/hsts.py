@@ -14,22 +14,6 @@ from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 from pyramid.request import Request
 from pyramid.settings import asbool
 
-def ensure_secure_url(url, parse_url=None):
-    """Add an ``s`` to the ``url`` protocol, if necessary."""
-    
-    if parse_url is None:
-        parse_url = urlparse.urlparse
-    
-    # If it's not secure, append an ``s`` to the protocol.
-    parsed = parse_url(url)
-    protocol = parsed.scheme
-    if protocol and not protocol.endswith('s'):
-        original_protocol = '{0}://'.format(protocol)
-        secure_protocol = '{0}s://'.format(protocol)
-        url = url.replace(original_protocol, secure_protocol, 1)
-    return url
-
-
 def hsts_redirect_to_https(event):
     """Redirects `http://` GET requests to `https://` and blocks non `https://`
       requests to other request methods.
@@ -166,11 +150,27 @@ def set_hsts_header(event):
             value += ' includeSubDomains'
         response.headers.add('Strict-Transport-Security', value)
 
-def secure_route_url(request, request_cls=None, secure_url=None):
-    """Overrides ``route_url`` to make sure the protocol of the resulting
-      link is secure.  This makes sure that the ``route_url`` function of
-      a secure app running behind an https front end can't mistakenly
-      output http links (for example).
+
+def ensure_secure_url(url, parse_url=None):
+    """Add an ``s`` to the ``url`` protocol, if necessary."""
+    
+    if parse_url is None:
+        parse_url = urlparse.urlparse
+    
+    # If it's not secure, append an ``s`` to the protocol.
+    parsed = parse_url(url)
+    protocol = parsed.scheme
+    netloc = parsed.netloc
+    host = netloc.split(':')[0] if netloc else netloc
+    if protocol and not protocol.endswith('s') and not host == 'localhost':
+        original_protocol = '{0}://'.format(protocol)
+        secure_protocol = '{0}s://'.format(protocol)
+        url = url.replace(original_protocol, secure_protocol, 1)
+    return url
+
+def secure_request_url(request, method_name, request_cls=None, secure_url=None):
+    """Overrides ``getattr(request, method_name)`` to make sure the
+      return value has a secure protocol.
     """
     
     # Test jig.
@@ -179,17 +179,35 @@ def secure_route_url(request, request_cls=None, secure_url=None):
     if secure_url is None:
         secure_url = ensure_secure_url
     
-    # Cache the original ``request.route_url`` method.
-    original_route_url = request_cls(request.environ).route_url
+    # Cache the original request method or property.
+    original = getattr(request_cls(request.environ), method_name)
     
-    def route_url(*args, **kwargs):
-        """Get the original ``route_url``.  Force it to use a secure protocol."""
-        
-        # Get the original url.
-        url = original_route_url(*args, **kwargs)
-        
-        # Return the secured version.
-        return secure_url(url)
+    # If the value isn't callable, it's a property, so secure that.
+    if not callable(original):
+        return secure_url(original)
     
-    return route_url
+    # Otherwise return a secured method.
+    return lambda *args, **kwargs: secure_url(original(*args, **kwargs))
+
+def secure_route_url(request, secure_url=None):
+    """Overrides ``route_url`` to make sure the protocol of the resulting
+      link is secure.  This makes sure that the ``route_url`` function of
+      a secure app running behind an https front end can't mistakenly
+      output http links (for example).
+    """
+    
+    # Test jig.
+    if secure_url is None:
+        secure_url = secure_request_url
+    
+    return secure_url(request, 'route_url')
+
+def secure_application_url(request, secure_url=None):
+    """Overrides ``application_url`` to make sure the protocol is secure."""
+    
+    # Test jig.
+    if secure_url is None:
+        secure_url = secure_request_url
+    
+    return secure_url(request, 'application_url')
 
