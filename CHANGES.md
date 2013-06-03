@@ -1,4 +1,9 @@
 
+## 0.10.2
+
+Add a tween to secure all relative redirect responses when HSTS is enabled. This
+fixes redirects in chrome, for apps running behind a proxy.
+
 ## 0.10.1
 
 And complete the set with a secured `request.resource_url` when HSTS is enabled.
