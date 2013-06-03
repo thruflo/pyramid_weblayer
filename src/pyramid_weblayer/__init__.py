@@ -125,7 +125,8 @@ def includeme(config):
         config.set_request_property(secure_resource_url, 'resource_url',
                 reify=True)
         config.set_request_property(secure_route_url, 'route_url', reify=True)
-        
+        config.add_tween('pyramid_weblayer.hsts.secure_redirect_tween')
+    
     # Has been seen flag.
     config.add_subscriber(set_seen_cookie, NewResponse)
     config.set_request_property(get_has_been_seen, 'has_been_seen', reify=True)

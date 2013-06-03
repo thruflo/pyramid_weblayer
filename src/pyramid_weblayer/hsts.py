@@ -217,3 +217,30 @@ def secure_route_url(request, secure_url=None):
     
     return secure_url(request, 'route_url')
 
+
+def secure_redirect_tween(handler, registry, join_url=None, secure_url=None):
+    """Pyramid tween factory that ensures that, if the response is a redirect
+      with a relative path, we join it to a url that's secured. (If we don't do
+      this the the webob base library will expand it using the request environ
+      which may lead to expansion into an insecure url).
+    """
+    
+    # Compose.
+    if join_url is None:
+        join_url = urlparse.urljoin
+    if secure_url is None:
+        secure_url = ensure_secure_url
+    
+    def tween(request):
+        """If the response is a redirect, then make sure the location is a
+          full url that's been passed to our ``secure_url`` function.
+        """
+        
+        response = handler(request)
+        if 300 <= response.status_code < 400:
+            url = secure_url(request.path_url)
+            response.location = join_url(url, response.location)
+        return response
+    
+    return tween
+
