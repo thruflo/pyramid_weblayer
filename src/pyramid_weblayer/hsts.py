@@ -14,7 +14,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPForbidden
 from pyramid.request import Request
 from pyramid.settings import asbool
 
-def hsts_redirect_to_https(event):
+def hsts_redirect_to_https(event, secure_url=None):
     """Redirects `http://` GET requests to `https://` and blocks non `https://`
       requests to other request methods.
       
@@ -69,30 +69,54 @@ def hsts_redirect_to_https(event):
       
     """
     
+    # XXX Debug.
+    logger.warn('hsts_redirect_to_https')
+    
+    # Compose.
+    if secure_url is None:
+        secure_url = ensure_secure_url
+    
     # Unpack the event.
     request = event.request
     settings = request.registry.settings
     
+    logger.warn(request)
+    logger.warn(settings)
+    
     # Exit unless told to enforce https.
     should_force_https = asbool(settings.get('hsts.force_https', False))
     if not should_force_https:
+        logger.warn('a')
         return
     
     # Exit if this is https (or any secure protocol).
     if request.scheme.endswith('s'):
+        logger.warn('b')
         return
+    
     # E.g.: on Heroku, they pass the protocol though using `X-Forwarded-Proto`.
     protocol_header = settings.get('hsts.protocol_header', None)
+    logger.warn('protocol_header')
+    logger.warn(protocol_header)
     if protocol_header:
         protocol = request.headers.get(protocol_header)
+        logger.warn('protocol')
+        logger.warn(protocol)
         if protocol and protocol.endswith('s'):
+            logger.warn('c')
             return
+    
+    logger.warn('d')
     
     # If this is an insecure GET request, then redirect.
     if request.method == 'GET' or request.method == 'HEAD':
-        url_parts = request.url.split('://')
-        secure_location = 's://'.join(url_parts)
+        logger.warn('e')
+        logger.warn(request.url)
+        secure_location = secure_url(request.url)
+        logger.warn(secure_location)
         raise HTTPFound(location=secure_location)
+    
+    logger.warn('f')
     
     # Otherwise refuse the request.
     raise HTTPForbidden()
@@ -204,9 +228,8 @@ def secure_resource_url(request, secure_url=None):
     # Test jig.
     if secure_url is None:
         secure_url = secure_request_url
-
+    
     return secure_url(request, 'resource_url')
-
 
 def secure_route_url(request, secure_url=None):
     """Overrides ``route_url`` to make sure the link is secure."""
@@ -236,10 +259,15 @@ def secure_redirect_tween(handler, registry, join_url=None, secure_url=None):
           full url that's been passed to our ``secure_url`` function.
         """
         
+        logger.warn('secure_redirect_tween')
+        
         response = handler(request)
+        logger.warn(response.status_code)
         if 300 <= response.status_code < 400:
-            url = secure_url(request.path_url)
-            response.location = join_url(url, response.location)
+            logger.warn('a')
+            logger.warn(response.location)
+            response.location = secure_url(response.location)
+            logger.warn(response.location)
         return response
     
     return tween
