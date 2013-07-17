@@ -1,4 +1,9 @@
 
+## 0.11
+
+Fix a major bug in the HSTS url -> secure url parsing logic that was squishing
+redirect responses in Chrome and IE.
+
 ## 0.10.2
 
 Add a tween to secure all relative redirect responses when HSTS is enabled. This
