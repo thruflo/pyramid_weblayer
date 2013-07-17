@@ -80,9 +80,6 @@ def hsts_redirect_to_https(event, secure_url=None):
     request = event.request
     settings = request.registry.settings
     
-    logger.warn(request)
-    logger.warn(settings)
-    
     # Exit unless told to enforce https.
     should_force_https = asbool(settings.get('hsts.force_https', False))
     if not should_force_https:
