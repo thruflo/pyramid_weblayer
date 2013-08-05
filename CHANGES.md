@@ -1,4 +1,8 @@
 
+## 0.11.2
+
+Fix import error in `0.11.1`.
+
 ## 0.11.1
 
 Provide ``request.track_page`` method to track a virtual page view with a server
