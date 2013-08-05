@@ -7,6 +7,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import threading
 import transaction
 
 def _handle_commit(tx_succeeded, *args_list, **kwargs):
@@ -169,3 +170,23 @@ def join_after_transaction(callable_, *args, **kwargs):
 
 # Default the main ``join_to_transaction`` to use an after commit hook.
 join_to_transaction = join_after_transaction
+
+def call_in_background(target, args=None, kwargs=None, join=None, thread_cls=None):
+    """Helper function for the common use case of firing and forgetting a
+      function call in a background thread.
+    """
+    
+    # Compose.
+    if join is None:
+        join = join_to_transaction
+    if thread_cls is None:
+        thread_cls = threading.Thread
+    
+    thread_kwargs = {}
+    if args is not None:
+        thread_kwargs['args'] = args
+    if kwargs is not None:
+        thread_kwargs['kwargs'] = kwargs
+    thread = thread_cls(target=target, **thread_kwargs)
+    return join(thread.start)
+

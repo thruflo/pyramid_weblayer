@@ -148,6 +148,7 @@ def includeme(config):
     
     # Provide ``request.track_event``.
     config.set_request_property(get_track_event, 'track_event', reify=True)
+    config.set_request_property(get_track_page, 'track_page', reify=True)
     
     # Favicon and robots.txt.
     config.add_route('favicon_ico', 'favicon.ico')
