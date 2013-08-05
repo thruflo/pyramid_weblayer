@@ -1,4 +1,9 @@
 
+## 0.11.1
+
+Provide ``request.track_page`` method to track a virtual page view with a server
+side call to google analytics.
+
 ## 0.11
 
 Fix a major bug in the HSTS url -> secure url parsing logic that was squishing
