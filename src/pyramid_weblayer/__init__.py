@@ -22,6 +22,7 @@ from .serve import get_serve_spec
 from .session import get_session_id
 from .snip import add_snip_functions
 from .track import get_track_event
+from .track import get_track_page
 from .utils import *
 
 def includeme(config):
