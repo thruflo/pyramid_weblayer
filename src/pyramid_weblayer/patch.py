@@ -5,6 +5,7 @@
 import logging
 logger = logging.getLogger(__name__)
 
+import hashlib
 import sys
 
 from beaker import cache
@@ -23,29 +24,30 @@ else:
     class UnicodeKeyCapableMakoPlugin(MakoPlugin):
         """Override the plugin to handle unicode keys gracefully."""
         
+        def _prepare(self, key):
+            """Coerce to UTF-8 and hash if longer than 250 chars."""
+            
+            k = key.encode('utf-8') if isinstance(key, unicode) else key
+            return hashlib.md5(k).hexdigest() if len(k) > 250 else k
+        
         def get_and_replace(self, key, *args, **kw):
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
+            key = self._prepare(key)
             return MakoPlugin.get_and_replace(self, key, *args, **kw)
 
         def get_or_create(self, key, *args, **kw):
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
+            key = self._prepare(key)
             return MakoPlugin.get_or_create(self, key, *args, **kw)
 
         def put(self, key, *args, **kw):
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
+            key = self._prepare(key)
             return MakoPlugin.put(self, key, *args, **kw)
 
         def get(self, key, *args, **kw):
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
+            key = self._prepare(key)
             return MakoPlugin.get(self, key, *args, **kw)
 
         def invalidate(self, key, *args, **kw):
-            if isinstance(key, unicode):
-                key = key.encode('utf-8')
+            key = self._prepare(key)
             return MakoPlugin.invalidate(self, key, *args, **kw)
         
     
