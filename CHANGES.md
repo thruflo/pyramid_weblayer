@@ -1,4 +1,8 @@
 
+## 0.11.3
+
+Hack in a horrible `use dogpile.cache as mako backed` integration.
+
 ## 0.11.2
 
 Fix import error in `0.11.1`.
