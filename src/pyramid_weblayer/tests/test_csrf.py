@@ -103,8 +103,8 @@ class TestCSRFValidator(unittest.TestCase):
             mock_request
         )
     
-    def test_ignores_xmlhttprequests(self):
-        """Ignores ``XMLHttpRequest``s."""
+    def test_xmlhttprequests(self):
+        """Also validates ``XMLHttpRequest``s."""
         
         from ..csrf import CSRFError
         
@@ -119,6 +119,47 @@ class TestCSRFValidator(unittest.TestCase):
         )
         
         mock_request.headers = {'X-Requested-With': 'XMLHttpRequest'}
+        self.assertRaises(
+            CSRFError,
+            validator.validate,
+            mock_request
+        )
+    
+    def test_xmlhttprequests_headers(self):
+        """Looks for token in ``X-CSRFToken`` of ``XMLHttpRequest``s."""
+        
+        from ..csrf import CSRFError
+        
+        mock_request = Mock()
+        mock_request.method = 'A'
+        mock_request.headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': 'token'
+        }
+        validator = self.makeOne('token', target_methods=['a'])
+        retval = validator.validate(mock_request)
+        self.assertTrue(retval is None)
+    
+    def test_xmlhttprequests_headers(self):
+        """``X-CSRFToken`` will be overriden by ``_csrf``."""
+        
+        from ..csrf import CSRFError
+        
+        mock_request = Mock()
+        mock_request.method = 'A'
+        mock_request.headers = {
+            'X-Requested-With': 'XMLHttpRequest',
+            'X-CSRFToken': 'wrong'
+        }
+        validator = self.makeOne('token', target_methods=['a'])
+        self.assertRaises(
+            CSRFError,
+            validator.validate,
+            mock_request
+        )
+        
+        mock_request.params = {'_csrf': 'token'}
+        validator = self.makeOne('token', target_methods=['a'])
         retval = validator.validate(mock_request)
         self.assertTrue(retval is None)
     

@@ -12,6 +12,7 @@ __all__ = [
 ]
 
 from pyramid.httpexceptions import HTTPUnauthorized
+from pyramid_layout.panel import panel_config
 
 METHODS_WITH_SIDE_EFFECTS = (
     'delete',
@@ -34,9 +35,11 @@ class CSRFValidator(object):
         if not request.method.lower() in self._target_methods:
             return
         if request.headers.get("X-Requested-With") == "XMLHttpRequest":
-            return
-        request_param = request.params.get('_csrf', None)
-        if request_param is None or request_param != self._session_token:
+            default_value = request.headers.get('X-CSRFToken', None)
+        else:
+            default_value = None
+        token_value = request.params.get('_csrf', default_value)
+        if token_value is None or token_value != self._session_token:
             raise CSRFError
     
 
@@ -70,4 +73,15 @@ def validate_against_csrf(event, Validator=CSRFValidator):
         Validator(session_token).validate(request)
     except CSRFError:
         raise HTTPUnauthorized
+
+
+@panel_config('csrf-ajax-setup',
+        renderer='pyramid_weblayer:templates/csrf_ajax_setup.mako')
+def csrf_ajax_setup_panel(context, request):
+    """Pass the current CSRF token and target methods to the panel template."""
+    
+    return {
+        'token': request.session.get_csrf_token(), 
+        'methods': [item.upper() for item in METHODS_WITH_SIDE_EFFECTS]
+    }
 

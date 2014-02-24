@@ -48,6 +48,7 @@ setup(
         'pyramid',
         'pyramid_basemodel',
         'pyramid_hsts',
+        'pyramid_layout',
         'transaction',
         'zope.interface'
     ],
