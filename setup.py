@@ -47,6 +47,7 @@ setup(
         'pyga',
         'pyramid',
         'pyramid_basemodel',
+        'pyramid_hsts',
         'transaction',
         'zope.interface'
     ],

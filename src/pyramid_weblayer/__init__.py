@@ -119,14 +119,7 @@ def includeme(config):
     settings = config.registry.settings
     should_force_https = asbool(settings.get('hsts.force_https', False))
     if should_force_https:
-        config.add_subscriber(hsts_redirect_to_https, NewRequest)
-        config.add_subscriber(set_hsts_header, NewResponse)
-        config.set_request_property(secure_application_url, 'application_url',
-                reify=True)
-        config.set_request_property(secure_resource_url, 'resource_url',
-                reify=True)
-        config.set_request_property(secure_route_url, 'route_url', reify=True)
-        config.add_tween('pyramid_weblayer.hsts.secure_redirect_tween')
+        config.include('pyramid_hsts')
     
     # Has been seen flag.
     config.add_subscriber(set_seen_cookie, NewResponse)
