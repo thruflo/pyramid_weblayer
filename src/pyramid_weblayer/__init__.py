@@ -56,14 +56,11 @@ def includeme(config):
       
       Optionally force https::
       
+          >>> mock_config.include.called
+          False
           >>> mock_config.registry.settings = {'hsts.force_https': True}
           >>> includeme(mock_config)
-          >>> mock_config.add_subscriber.assert_any_call(hsts_redirect_to_https, 
-          ...         NewRequest)
-          >>> mock_config.add_subscriber.assert_any_call(set_hsts_header, 
-          ...         NewResponse)
-          >>> mock_config.set_request_property.assert_any_call(secure_route_url,
-          ...         'route_url', reify=True)
+          >>> mock_config.include.assert_any_call('pyramid_hsts')
       
       Has been seen flag.::
       
