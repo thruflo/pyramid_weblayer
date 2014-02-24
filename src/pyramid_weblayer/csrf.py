@@ -8,8 +8,14 @@
 
 __all__ = [
     'CSRFError',
-    'CSRFValidator'
+    'CSRFValidator',
+    'METHODS_WITH_SIDE_EFFECTS',
+    'validate_against_csrf',
+    'validate_authenticated_xhr',
 ]
+
+import logging
+logger = logging.getLogger(__name__)
 
 from pyramid.httpexceptions import HTTPUnauthorized
 from pyramid_layout.panel import panel_config
@@ -34,7 +40,7 @@ class CSRFValidator(object):
     def validate(self, request):
         if not request.method.lower() in self._target_methods:
             return
-        if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+        if request.is_xhr:
             default_value = request.headers.get('X-CSRFToken', None)
         else:
             default_value = None
@@ -44,9 +50,14 @@ class CSRFValidator(object):
     
 
 
-def validate_against_csrf(event, Validator=CSRFValidator):
+def validate_against_csrf(event, validator_cls=None):
     """Event subscriber that uses the session to validate incoming requests."""
     
+    # Compose.
+    if validator_cls is None:
+        validator_cls = CSRFValidator
+    
+    # Unpack.
     request = event.request
     settings = request.registry.settings
     
@@ -69,8 +80,9 @@ def validate_against_csrf(event, Validator=CSRFValidator):
                 return
     
     session_token = request.session.get_csrf_token()
+    csrf_validator = validator_cls(session_token)
     try:
-        Validator(session_token).validate(request)
+        csrf_validator.validate(request)
     except CSRFError:
         raise HTTPUnauthorized
 
