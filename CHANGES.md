@@ -1,4 +1,8 @@
 
+## 0.11.4
+
+Use the extracted `pyramid_hsts` package for the HSTS implementation.
+
 ## 0.11.3
 
 Hack in a horrible `use dogpile.cache as mako backed` integration.
