@@ -86,6 +86,24 @@ def validate_against_csrf(event, validator_cls=None):
     except CSRFError:
         raise HTTPUnauthorized
 
+def validate_authenticated_xhr(event, validate=None):
+    """Event subscriber that uses the session to validate authenticated XHR
+      requests against Cross Site Request Forgery.
+      
+      The point being to allow an API to validate cookie authenticated XHR
+      requests, as per https://www.djangoproject.com/weblog/2011/feb/08/security/
+      While still allowing the API to be accessed without CSRF protection for
+      non-XHR usage, e.g.: in tests or via alternative authentication.
+    """
+    
+    # Compose.
+    if validate is None:
+        validate = validate_against_csrf
+    
+    request = event.request
+    if request.is_xhr and request.is_authenticated:
+        validate(event)
+
 
 @panel_config('csrf-ajax-setup',
         renderer='pyramid_weblayer:templates/csrf_ajax_setup.mako')
