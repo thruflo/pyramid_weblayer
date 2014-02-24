@@ -1,4 +1,40 @@
 
+## 0.12
+
+Breaking change: update CSRF machinery to also protect AJAX requests, as per
+[this security advice][].
+
+Previously, requests with an `X-Requested-With` header value of `XMLHttpRequest`
+were not validated against a CSRF token. Now, they are. This will break existing
+applications that rely on the previous behaviour: they will see `403 Forbidden`
+responses to XHR requests that were previously working -- when those requests
+use methods that can have side effects, i.e.: `POST`, `PUT` and `DELETE`.
+
+The new CSRF validator for `XMLHttpRequest`s first looks for a `_csrf` token in
+the request params (as per normal requests). If this is not found, it looks for
+a token in the `X-CSRFToken` header.
+
+If you use jQuery (or Zepto, etc.) and server side templating through Pyramid,
+you can use the [pyramid_layout][] panel provided to add this header to all
+appropriate AJAX requests. Add it to your base template, e.g. just below your
+jQuery / Zepto script:
+
+    <script src="your/jquery.js"></script>
+    ${panel('csrf-ajax-setup')}
+
+This adds a script element with code along these lines:
+
+    $.ajaxSetup({
+      'beforeSend': function(xhr, s) {
+        if (can_have_side_effects && is_relative_or_same_origin) {
+          xhr.setRequestHeader('X-CSRFToken', '<csrf token>');
+        }
+      }
+    });
+
+[this security advice]: https://www.djangoproject.com/weblog/2011/feb/08/security/
+[pyramid_layout]: http://docs.pylonsproject.org/projects/pyramid_layout/en/latest/
+
 ## 0.11.4
 
 Use the extracted `pyramid_hsts` package for the HSTS implementation.
