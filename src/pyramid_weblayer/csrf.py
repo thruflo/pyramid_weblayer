@@ -103,11 +103,20 @@ def validate_session_authenticated(event, unauth_userid=None, validate=None):
     request = event.request
     registry = request.registry
     
+    # Start by making CSRF validation the default. This protects against
+    # exposure to having coded against the internal implementation detail
+    # noted below -- if something changes and this logic breaks, we'll
+    # hopefully deny requests we should allow, rather than allowing requests
+    # we should deny.
+    should_validate = True
+    
     # Determine whether to validate the request -- first checking that the
-    # request *is* authenticated, then that it was authenticated using a
-    # policy that is or is like the pyramid ``SessionAuthenticationPolicy``.
-    should_validate = True # XXX start by making CSRF validation the default.
+    # request *is* authenticated, then that we're not running tests,
+    # then that it was authenticated using a policy that is (or is like)
+    # the pyramid ``SessionAuthenticationPolicy``.
     if not request.is_authenticated:
+        should_validate = False
+    elif request.environ.get('paste.testing'):
         should_validate = False
     else: # XXX this next logic is coded against an internal implementation
         # detail of the ``SessionAuthenticationPolicy``.
@@ -119,8 +128,6 @@ def validate_session_authenticated(event, unauth_userid=None, validate=None):
         # so checking that the session_value equals it also checks that the
         # session value is not None.
         should_validate = session_value == principal_id
-    
-    # Validate if necessary.
     if should_validate:
         validate(event)
 
