@@ -11,13 +11,15 @@ __all__ = [
     'CSRFValidator',
     'METHODS_WITH_SIDE_EFFECTS',
     'validate_against_csrf',
-    'validate_authenticated_xhr',
+    'validate_session_authenticated',
 ]
 
 import logging
 logger = logging.getLogger(__name__)
 
 from pyramid.httpexceptions import HTTPUnauthorized
+from pyramid.interfaces import IAuthenticationPolicy
+from pyramid.security import unauthenticated_userid
 from pyramid_layout.panel import panel_config
 
 METHODS_WITH_SIDE_EFFECTS = (
@@ -86,22 +88,40 @@ def validate_against_csrf(event, validator_cls=None):
     except CSRFError:
         raise HTTPUnauthorized
 
-def validate_authenticated_xhr(event, validate=None):
-    """Event subscriber that uses the session to validate authenticated XHR
-      requests against Cross Site Request Forgery.
-      
-      The point being to allow an API to validate cookie authenticated XHR
-      requests, as per https://www.djangoproject.com/weblog/2011/feb/08/security/
-      While still allowing the API to be accessed without CSRF protection for
-      non-XHR usage, e.g.: in tests or via alternative authentication.
+def validate_session_authenticated(event, unauth_userid=None, validate=None):
+    """Event subscriber that validates *session authenticated* requests
+      against Cross Site Request Forgery.
     """
     
-    # Compose.
+    # Compose.
+    if unauth_userid is None:
+        unauth_userid = unauthenticated_userid
     if validate is None:
         validate = validate_against_csrf
     
+    # Unpack.
     request = event.request
-    if request.is_xhr and request.is_authenticated:
+    registry = request.registry
+    
+    # Determine whether to validate the request -- first checking that the
+    # request *is* authenticated, then that it was authenticated using a
+    # policy that is or is like the pyramid ``SessionAuthenticationPolicy``.
+    should_validate = True # XXX start by making CSRF validation the default.
+    if not request.is_authenticated:
+        should_validate = False
+    else: # XXX this next logic is coded against an internal implementation
+        # detail of the ``SessionAuthenticationPolicy``.
+        policy = registry.queryUtility(IAuthenticationPolicy)
+        key = getattr(policy, 'userid_key', None)
+        session_value = key and request.session.get(key) or None
+        principal_id = unauth_userid(request)
+        # We know that the principal_id exists as the request is authenticated,
+        # so checking that the session_value equals it also checks that the
+        # session value is not None.
+        should_validate = session_value == principal_id
+    
+    # Validate if necessary.
+    if should_validate:
         validate(event)
 
 
