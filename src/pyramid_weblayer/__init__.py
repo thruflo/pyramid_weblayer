@@ -16,6 +16,7 @@ from .hsts import secure_route_url
 from .i18n import add_underscore_translation
 from .markdown import markdown_to_html
 from .nav import add_is_active_function
+from .redirect import get_redirect_to
 from .seen import set_seen_cookie
 from .seen import get_has_been_seen
 from .serve import get_serve_spec
@@ -133,6 +134,9 @@ def includeme(config):
     
     # Provide ``request.markdown_to_html``.
     config.set_request_property(markdown_to_html, 'markdown_to_html', reify=True)
+    
+    # Provide ``request.redirect_to``.
+    config.add_request_method(get_redirect_to, 'redirect_to')
     
     # Provide ``request.serve_spec``.
     config.set_request_property(get_serve_spec, 'serve_spec', reify=True)
