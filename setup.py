@@ -14,7 +14,7 @@ def _read(file_name):
 
 setup(
     name = 'pyramid_weblayer',
-    version = '0.12.3',
+    version = '0.12.4',
     description = 'Common / reusable utilities for a Pyramid web application.',
     author = 'James Arthur',
     author_email = 'username: thruflo, domain: gmail.com',
