@@ -10,7 +10,10 @@ import sys
 
 from beaker import cache
 from beaker.util import coerce_cache_params
-from pyramid import mako_templating
+try: # pyramid >= 1.5
+    import pyramid_mako
+except ImportError: # <= 1.4
+    from pyramid import mako_templating as pyramid_mako
 
 from mako.cache import register_plugin
 from mako.lookup import TemplateLookup
@@ -95,7 +98,7 @@ def coerge_dogpile_args(args):
 def templateLookupFactory(settings):
     """Use the ``settings`` to return a patched ``TemplateLookup`` class."""
     
-    class TemplateLookup(mako_templating.PkgResourceTemplateLookup):
+    class TemplateLookup(pyramid_mako.PkgResourceTemplateLookup):
         """Sets ``cache_args`` if not passed into the lookup constructor."""
     
         def __init__(self, *args, **kwargs):
@@ -132,5 +135,5 @@ def patch_all(settings):
     """Run all the patches."""
     
     # Patch ``mako.lookup.TemplateLookup`` to be our ``TemplateLookup`` class.
-    mako_templating.PkgResourceTemplateLookup = templateLookupFactory(settings)
+    pyramid_mako.PkgResourceTemplateLookup = templateLookupFactory(settings)
 
