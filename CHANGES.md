@@ -1,4 +1,10 @@
 
+## 0.12.5
+
+Update the mako monkey patching in `patch.py` to work with both the old
+`pyramid.mako_templating` module and the new `pyramid_mako` library
+introduced with Pyramid 1.5.
+
 ## 0.12
 
 Breaking change: update CSRF machinery to also protect AJAX requests, as per
