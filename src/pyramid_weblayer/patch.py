@@ -119,7 +119,8 @@ def templateLookupFactory(settings):
                         cache_args[name] = value
                 coerce_cache_params(cache_args)
                 cache_args['timeout'] = cache_args.get('expire')
-                if cache_args['type'].startswith('dogpile.cache'):
+                type_arg = cache_args.get('type')
+                if type_arg and type_arg.startswith('dogpile.cache'):
                     cache_args = coerge_dogpile_args(cache_args)
                     register_plugin("dogpile.cache",
                             "pyramid_weblayer.patch", "UnicodeKeyCapableMakoPlugin")
