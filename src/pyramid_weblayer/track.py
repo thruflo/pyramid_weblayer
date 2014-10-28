@@ -145,7 +145,7 @@ def get_track_event(request, call_in_bg=None, event_cls=None, factory_cls=None):
         
         # Exit if in development.
         settings = request.registry.settings
-        if settings.get('mode', None) == 'development':
+        if settings.get('mode', None) in ['development', 'testing']:
             return
         
         # Instantiate configured pyga ``tracker``, ``session`` and ``visitor``s.
@@ -215,7 +215,7 @@ def get_track_page(request, call_in_bg=None, page_cls=None, factory_cls=None):
         
         # Exit if in development.
         settings = request.registry.settings
-        if settings.get('mode', None) == 'development':
+        if settings.get('mode', None) in ['development', 'testing']:
             return
         
         # Instantiate configured pyga ``tracker``, ``session`` and ``visitor``s.
