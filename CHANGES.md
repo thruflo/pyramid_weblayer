@@ -1,4 +1,8 @@
 
+## 0.13
+
+Noop tracking in `development` and `testing` modes.
+
 ## 0.12.5
 
 Update the mako monkey patching in `patch.py` to work with both the old
