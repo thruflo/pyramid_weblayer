@@ -10,7 +10,6 @@ import os
 from pyramid.config import Configurator
 
 from pyramid_basemodel import Session
-from pyramid_weblayer.patch import patch_all
 
 def augment_settings(settings, env):
     """Use the ``env`` to augment the ``settings``."""
