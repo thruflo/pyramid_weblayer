@@ -59,7 +59,7 @@ def augment_settings(settings, env):
     for k, v in settings.items():
         try:
             settings[k] = int(v)
-        except ValueError:
+        except (TypeError, ValueError):
             pass
     
     # Return, augmented.
