@@ -92,8 +92,11 @@ def make_wsgi_app(root_factory, includeme, patch=None, bind=None, augment=None,
         bind()
     
     # Initialise a ``Configurator`` and apply the package configuration.
-    config = configurator_cls(registry=registry, settings=settings,
-            root_factory=root_factory)
+    if registry:
+        config = configurator_cls(registry=registry)
+        config.setup_registry(settings=settings, root_factory=root_factory)
+    else:
+        config = configurator_cls(settings=settings, root_factory=root_factory)
     includeme(config)
     
     # Close the db connection for this thread.
@@ -101,4 +104,3 @@ def make_wsgi_app(root_factory, includeme, patch=None, bind=None, augment=None,
     
     # Return a WSGI app.
     return config.make_wsgi_app()
-
