@@ -66,7 +66,7 @@ def augment_settings(settings, env):
     return settings
 
 def make_wsgi_app(root_factory, includeme, patch=None, bind=None, augment=None,
-        env=None, configurator_cls=None, session=None, **settings):
+        env=None, configurator_cls=None, session=None, registry=None, **settings):
     """Create and return a WSGI application."""
     
     # Compose.
@@ -92,7 +92,8 @@ def make_wsgi_app(root_factory, includeme, patch=None, bind=None, augment=None,
         bind()
     
     # Initialise a ``Configurator`` and apply the package configuration.
-    config = configurator_cls(settings=settings, root_factory=root_factory)
+    config = configurator_cls(registry=registry, settings=settings,
+            root_factory=root_factory)
     includeme(config)
     
     # Close the db connection for this thread.
