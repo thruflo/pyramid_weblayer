@@ -42,11 +42,8 @@ class CSRFValidator(object):
     def validate(self, request):
         if not request.method.lower() in self._target_methods:
             return
-        if request.is_xhr:
-            default_value = request.headers.get('X-CSRFToken', None)
-        else:
-            default_value = None
-        token_value = request.params.get('_csrf', default_value)
+        header_value = request.headers.get('X-CSRFToken', None)
+        token_value = request.params.get('_csrf', header_value)
         if token_value is None or token_value != self._session_token:
             raise CSRFError
     
