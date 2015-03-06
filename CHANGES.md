@@ -1,4 +1,8 @@
 
+## 0.14
+
+Fix CSRF validation for CORS requests using `withCredentials`.
+
 ## 0.13.2
 
 Allow configuration `registry` to be passed into `main.make_wsgi_app`.
