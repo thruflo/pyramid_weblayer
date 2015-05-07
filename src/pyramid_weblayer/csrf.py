@@ -52,6 +52,8 @@ class CSRFValidator(object):
 def validate_against_csrf(event, validator_cls=None):
     """Event subscriber that uses the session to validate incoming requests."""
     
+    # logger.warn(('validate_against_csrf', event))
+
     # Compose.
     if validator_cls is None:
         validator_cls = CSRFValidator
@@ -60,9 +62,13 @@ def validate_against_csrf(event, validator_cls=None):
     request = event.request
     settings = request.registry.settings
     
+    # logger.warn('A')
+
     # Only validate if enabled.
     if not settings.get('csrf.validate', True):
         return
+    
+    # logger.warn('B')
     
     # Ignore specified routes.
     matched_route = request.matched_route
@@ -71,6 +77,8 @@ def validate_against_csrf(event, validator_cls=None):
         if matched_route.name in ignore_routes.split():
             return
     
+    # logger.warn('C')
+    
     # Ignore specified paths.
     ignore_paths = settings.get('csrf.ignore_paths', None)
     if ignore_paths:
@@ -78,18 +86,26 @@ def validate_against_csrf(event, validator_cls=None):
             if request.path.startswith(path):
                 return
     
+    # logger.warn('D')
+    
     session_token = request.session.get_csrf_token()
     csrf_validator = validator_cls(session_token)
+    
+    # logger.warn(('session_token', session_token))
+
     try:
         csrf_validator.validate(request)
     except CSRFError:
+        # logger.warn('RAISING 401')
         raise HTTPUnauthorized
 
 def validate_session_authenticated(event, unauth_userid=None, validate=None):
     """Event subscriber that validates *session authenticated* requests
       against Cross Site Request Forgery.
     """
-    
+
+    # logger.warn(('csrf.validate_session_authenticated', event))
+
     # Compose.
     if unauth_userid is None:
         unauth_userid = unauthenticated_userid
@@ -112,8 +128,10 @@ def validate_session_authenticated(event, unauth_userid=None, validate=None):
     # then that it was authenticated using a policy that is (or is like)
     # the pyramid ``SessionAuthenticationPolicy``.
     if not request.is_authenticated:
+        # logger.warn(('not authenticated'))
         should_validate = False
     elif request.environ.get('paste.testing'):
+        # logger.warn(('testing'))
         should_validate = False
     else: # XXX this next logic is coded against an internal implementation
         # detail of the ``SessionAuthenticationPolicy``.
@@ -124,7 +142,9 @@ def validate_session_authenticated(event, unauth_userid=None, validate=None):
         # We know that the principal_id exists as the request is authenticated,
         # so checking that the session_value equals it also checks that the
         # session value is not None.
+        # logger.warn(('session_value == principal_id', session_value == principal_id))
         should_validate = session_value == principal_id
+    # logger.warn(('should_validate', should_validate))
     if should_validate:
         validate(event)
 
