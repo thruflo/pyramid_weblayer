@@ -1,3 +1,6 @@
+# 0.14.1
+
+Bump to remove `src/*.egg-info` directory from PyPI distribution.
 
 ## 0.14
 
