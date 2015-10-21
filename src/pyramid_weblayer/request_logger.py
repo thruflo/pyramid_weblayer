@@ -78,7 +78,15 @@ class RequestLoggerMiddleware(object):
                     if not IGNORE_PATH_VALIDATOR.match(path):
                         # Truncate string to MAX_BODY_SIZE_IN_LEN.
                         if content_length > MAX_BODY_SIZE_IN_LEN:
-                            body = 'too big'
+                            body = []
+                            count = 0
+                            for word in pyramid_request.body:
+                                count = count + 1
+                                if count < MAX_BODY_SIZE_IN_LEN:
+                                    body.append(word)
+                                else:
+                                    break
+                            body = ''.join(body)
                         else:
                             body = pyramid_request.body
 
