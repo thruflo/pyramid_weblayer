@@ -17,6 +17,7 @@ from .i18n import add_underscore_translation
 from .markdown import markdown_to_html
 from .nav import add_is_active_function
 from .redirect import get_redirect_to
+from .request_logger import request_logger_middleware_factory
 from .seen import set_seen_cookie
 from .seen import get_has_been_seen
 from .serve import get_serve_spec
