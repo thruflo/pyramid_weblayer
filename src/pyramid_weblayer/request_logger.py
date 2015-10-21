@@ -35,8 +35,8 @@ DEFAULTS = {
     'request_logger.mimetype_ignore_regex': os.environ.get('REQUEST_LOGGER_MIMETYPE_IGNORE_REGEX', '.*multipart.*'),
 }
 
-# 2 KB.
-MAX_BODY_SIZE_IN_BYTES = 2000
+# 20 KB.
+MAX_BODY_SIZE_IN_BYTES = 20000
 # Roughly two bytes per char.
 MAX_BODY_SIZE_IN_LEN = MAX_BODY_SIZE_IN_BYTES / 2
 
@@ -78,15 +78,8 @@ class RequestLoggerMiddleware(object):
                     if not IGNORE_PATH_VALIDATOR.match(path):
                         # Truncate string to MAX_BODY_SIZE_IN_LEN.
                         if content_length > MAX_BODY_SIZE_IN_LEN:
-                            body = []
-                            count = 0
-                            for word in pyramid_request.body:
-                                count = count + 1
-                                if count < MAX_BODY_SIZE_IN_LEN:
-                                    body.append(word)
-                                else:
-                                    break
-                            body = ''.join(body)
+                            body = pyramid_request.body_file.read(MAX_BODY_SIZE_IN_BYTES)
+                            pyramid_request.body_file.seek(0)
                         else:
                             body = pyramid_request.body
 
