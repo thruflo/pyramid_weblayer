@@ -26,6 +26,7 @@ from boto import dynamodb2
 import re
 
 from sys import getsizeof
+import datetime
 
 
 DEFAULTS = {
@@ -93,7 +94,8 @@ class RequestLoggerMiddleware(object):
         if not body:
             body = {}
         # Build a dict with key, headers and body.
-        data = {'request_id': key, 'body': body, 'path': path}
+        now = datetime.datetime.now().isoformat()
+        data = {'request_id': key, 'body': body, 'path': path, 'created': now}
         for k, v in headers.items():
             data[k] = v
         # Put to Dynamodb as a separated thread.
