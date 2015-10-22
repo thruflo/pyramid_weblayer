@@ -56,23 +56,24 @@ class RequestLoggerMiddleware(object):
 
         # Get Heroku's request identifier.
         request_id = environ.get('HTTP_X_REQUEST_ID', None)
-        content_length = int(environ.get('CONTENT_LENGTH', 0))
-        content_type = environ.get('CONTENT_TYPE', None)
 
-        # If we have it, save the request data.
+        # If we have it, check the request method.
         if request_id:
-            # Create a pyramid request from environ.
-            pyramid_request = request.Request(environ)
-            headers = pyramid_request.headers
-            path = pyramid_request.path
-            body = None
-
-            # If it's a PUT or POST request log body as well.
+            # We only want to save PUT or POST requests.
             if environ['REQUEST_METHOD'].upper() == 'POST' or\
                     environ['REQUEST_METHOD'].upper() == 'PUT':
+
+                # Grab information from the environ.
+                content_length = int(environ.get('CONTENT_LENGTH', 0))
+                content_type = environ.get('CONTENT_TYPE', None)
+                # Create a pyramid request from environ.
+                pyramid_request = request.Request(environ)
+                headers = pyramid_request.headers
+                path = pyramid_request.path
+                body = None
                 # If it's a multipart request don't bother.
                 if IGNORE_MIMETYPE_VALIDATOR.match(content_type):
-                    body = 'it is a multipart request'
+                    body = 'it is a multipart request.'
                 else:
                     # Unless we are in the path we want to ignore body (e.g: auth)
                     if not IGNORE_PATH_VALIDATOR.match(path):
@@ -83,7 +84,7 @@ class RequestLoggerMiddleware(object):
                         else:
                             body = pyramid_request.body
 
-            self.log_request(request_id, path, headers, body)
+                self.log_request(request_id, path, headers, body)
 
         return app(environ, start_response)
 
