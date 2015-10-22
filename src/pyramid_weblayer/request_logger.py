@@ -16,8 +16,6 @@ logger = logging.getLogger(__name__)
 import threading
 import os
 
-from pyramid import request
-
 from boto.dynamodb2.fields import HashKey
 from boto.dynamodb2.table import Table
 from boto.dynamodb2.types import NUMBER
@@ -28,65 +26,97 @@ import re
 from sys import getsizeof
 import datetime
 
+from paste.exceptions.errormiddleware import ErrorMiddleware
+
 
 DEFAULTS = {
     'request_logger.max_body_size_in_bytes': os.environ.get('REQUEST_LOGGER_MAX_BODY_SIZE_IN_BYTES', 2000),
     'request_logger.path_ignore_regex': os.environ.get('REQUEST_LOGGER_PATH_IGNORE_REGEX', '.*/auth/.*'),
     'request_logger.mimetype_ignore_regex': os.environ.get('REQUEST_LOGGER_MIMETYPE_IGNORE_REGEX', '.*multipart.*'),
+    'request_logger.request_id_header_name': os.environ.get('REQUEST_LOGGER_REQUEST_ID_HEADER_NAME', 'X_REQUEST_ID'),
 }
 
 # 20 KB.
 MAX_BODY_SIZE_IN_BYTES = 20000
-# Roughly two bytes per char.
-MAX_BODY_SIZE_IN_LEN = MAX_BODY_SIZE_IN_BYTES / 2
 
 IGNORE_PATH_VALIDATOR = re.compile('{0}'.format(DEFAULTS['request_logger.path_ignore_regex']))
 IGNORE_MIMETYPE_VALIDATOR = re.compile('{0}'.format(DEFAULTS['request_logger.mimetype_ignore_regex']))
 
-class RequestLoggerMiddleware(object):
+WRITE_METHODS = ('POST', 'PUT', 'DELETE', 'PATCH')
+REQUEST_ID_HEADER_NAME = DEFAULTS['request_logger.request_id_header_name']
+
+def client_factory():
+    """Return an AmazonDB client that provides a
+      ``put_item(data=data)`` method.
+    """
+
+    return Table(
+        'request_storer',
+        schema=[HashKey('request_id')],
+        connection=dynamodb2.connect_to_region('eu-west-1')
+    )
+
+class RequestLoggerTweenFactory(object):
     """Simple middleware to log all of our requests by Heroku request id."""
 
-    def __init__(self, app, **kwargs):
-        self.app = app
+    def __init__(self, handler, registry, **kwargs):
+        self.handler = handler
+        self.registry = registry
+        self.client = kwargs.get('client', client_factory())
 
-    def __call__(self, environ, start_response):
+    def __call__(self, request):
+        """XXX"""
 
-        # Unpack.
-        app = self.app
+        # Unpack the request.
+        path = request.path
+        headers = request.headers
 
-        # Get Heroku's request identifier.
-        request_id = environ.get('HTTP_X_REQUEST_ID', None)
+        # Figure out if we'll want to log an exception or not.
+        request_id = headers.get(REQUEST_ID_HEADER_NAME, None)
+        should_log_exc = request_id and request.method.upper() in WRITE_METHODS
 
-        # If we have it, check the request method.
-        if request_id:
-            # We only want to save PUT or POST requests.
-            if environ['REQUEST_METHOD'].upper() == 'POST' or\
-                    environ['REQUEST_METHOD'].upper() == 'PUT':
+        # Let the app actually handle the request.
+        response = self.handler(request)
 
-                # Grab information from the environ.
-                content_length = int(environ.get('CONTENT_LENGTH', 0))
-                content_type = environ.get('CONTENT_TYPE', None)
-                # Create a pyramid request from environ.
-                pyramid_request = request.Request(environ)
-                headers = pyramid_request.headers
-                path = pyramid_request.path
-                body = None
-                # If it's a multipart request don't bother.
-                if IGNORE_MIMETYPE_VALIDATOR.match(content_type):
-                    body = 'it is a multipart request.'
-                else:
-                    # Unless we are in the path we want to ignore body (e.g: auth)
-                    if not IGNORE_PATH_VALIDATOR.match(path):
-                        # Truncate string to MAX_BODY_SIZE_IN_LEN.
-                        if content_length > MAX_BODY_SIZE_IN_LEN:
-                            body = pyramid_request.body_file.read(MAX_BODY_SIZE_IN_BYTES)
-                            pyramid_request.body_file.seek(0)
-                        else:
-                            body = pyramid_request.body
+        # Then if the request was interesting and resulted in
+        # an error response, then spawn a green thread to log
+        # the request data in the background.
+        if should_log_exc and response.status_int > 399:
+            body = self.get_body(request)
+            self.log_request(request_id, path, headers, body)
 
-                self.log_request(request_id, path, headers, body)
+        return response
 
-        return app(environ, start_response)
+    def get_body(self, request):
+        """Read the request body upto a maximum length."""
+
+        if IGNORE_MIMETYPE_VALIDATOR.match(request.content_type):
+            return 'N/a - multipart request.'
+
+        if IGNORE_PATH_VALIDATOR.match(request.path):
+            return 'N/a - may contain password'
+
+        # Get the body file and wind it back to the beginning.
+        sock = request.body_file_seekable
+        start_pos = sock.tell()
+        sock.seek(0)
+
+        # Read upto a maximum length.
+        body = sock.read(MAX_BODY_SIZE_IN_BYTES)
+
+        # And just for sanity's sake, put it back where we
+        # found it.
+        sock.seek(start_pos)
+        return body
+
+    def put_to_dynamodb(self, data):
+        """Make a PUT request to dynamodb2 and insert the data"""
+
+        try:
+            self.client.put_item(data=data)
+        except UnicodeDecodeError:
+            data['body'] = 'Unicode error when parsing'
+            self.client.put_item(data=data)
 
     def log_request(self, key, path, headers, body):
         """Log the path, headers and body of the HTTP request on a
@@ -95,28 +125,13 @@ class RequestLoggerMiddleware(object):
 
         if not body:
             body = {}
+
         # Build a dict with key, headers and body.
         now = datetime.datetime.now().isoformat()
         data = {'request_id': key, 'body': body, 'path': path, 'created': now}
         for k, v in headers.items():
             data[k] = v
-        # Put to Dynamodb as a separated thread.
-        threading.Thread(target=put_to_dynamodb, args=(data,)).start()
 
-
-def put_to_dynamodb(data):
-    """Make a PUT request to dynamodb2 and insert the data"""
-
-    requests_table = Table('request_storer',
-            schema=[HashKey('request_id')],
-            connection=dynamodb2.connect_to_region('eu-west-1')
-    )
-    try:
-        requests_table.put_item(data=data)
-    except UnicodeDecodeError:
-        data['body'] = 'Unicode error when parsing'
-        requests_table.put_item(data=data)
-
-def request_logger_middleware_factory(app, global_config):
-    return RequestLoggerMiddleware(app)
-
+        # Fire and forget.
+        t = threading.Thread(target=self.put_to_dynamodb, args=(data,))
+        t.start()
