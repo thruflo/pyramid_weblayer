@@ -9,12 +9,12 @@ def _read(file_name):
     text = sock.read()
     sock.close()
     return text
-    
+
 
 
 setup(
     name = 'pyramid_weblayer',
-    version = '0.14.3',
+    version = '0.14.4',
     description = 'Common / reusable utilities for a Pyramid web application.',
     author = 'James Arthur',
     author_email = 'username: thruflo, domain: gmail.com',
