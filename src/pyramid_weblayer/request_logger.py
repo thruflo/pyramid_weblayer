@@ -18,16 +18,11 @@ import os
 
 from boto.dynamodb2.fields import HashKey
 from boto.dynamodb2.table import Table
-from boto.dynamodb2.types import NUMBER
 from boto import dynamodb2
 
 import re
 
-from sys import getsizeof
 import datetime
-
-from paste.exceptions.errormiddleware import ErrorMiddleware
-
 
 DEFAULTS = {
     'request_logger.max_body_size_in_bytes': os.environ.get('REQUEST_LOGGER_MAX_BODY_SIZE_IN_BYTES', 2000),
