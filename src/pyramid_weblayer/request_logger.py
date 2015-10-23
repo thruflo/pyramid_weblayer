@@ -57,15 +57,18 @@ def client_factory():
     )
 
 class RequestLoggerTweenFactory(object):
-    """Simple middleware to log all of our requests by Heroku request id."""
+    """Simple pyramid tween to log all of our requests by Heroku request id."""
 
-    def __init__(self, handler, registry, **kwargs):
+    def __init__(self, handler, registry, client=None):
         self.handler = handler
         self.registry = registry
-        self.client = kwargs.get('client', client_factory())
+        self.client = client
+        if not self.client:
+            self.client = client_factory()
 
     def __call__(self, request):
-        """XXX"""
+        """Request logger pyramid tween, logs requests that have errored and
+        are of HTTP WRITE_METHODS to DynamoDB."""
 
         # Unpack the request.
         path = request.path
