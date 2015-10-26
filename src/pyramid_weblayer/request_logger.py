@@ -57,9 +57,15 @@ class RequestLoggerTweenFactory(object):
     def __init__(self, handler, registry, client=None):
         self.handler = handler
         self.registry = registry
+        self.settings = registry.settings
         self.client = client
         if not self.client:
-            self.client = client_factory()
+            # If we are testing and haven't supplied a client, mock it out.
+            if self.settings.get('mode') == 'testing':
+                from mock import Mock
+                self.client = Mock() 
+            else:
+                self.client = client_factory()
 
     def __call__(self, request):
         """Request logger pyramid tween, logs requests that have errored and
