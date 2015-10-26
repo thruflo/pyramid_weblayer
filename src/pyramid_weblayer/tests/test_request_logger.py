@@ -38,7 +38,7 @@ class TestRequestLogger(unittest.TestCase):
         client = Mock()
         # Create a dummy request and an empty registry.
         request = testing.DummyRequest(post={}, content_type='', body_file_seekable=Mock())
-        registry = {}
+        registry = Mock()
         # Instantiate the client and call it with the mock request.
         tween_client = request_logger.RequestLoggerTweenFactory(handler, registry, client=client)
         # Let the client process the request.
