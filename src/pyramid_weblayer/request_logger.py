@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 import threading
 import os
 
+
 from boto.dynamodb2.fields import HashKey
 from boto.dynamodb2.table import Table
 from boto import dynamodb2
@@ -63,7 +64,7 @@ class RequestLoggerTweenFactory(object):
             # If we are testing and haven't supplied a client, mock it out.
             if self.settings.get('mode') == 'testing':
                 from mock import Mock
-                self.client = Mock() 
+                self.client = Mock()
             else:
                 self.client = client_factory()
 
@@ -80,7 +81,13 @@ class RequestLoggerTweenFactory(object):
         should_log_exc = request_id and request.method.upper() in WRITE_METHODS
 
         # Let the app actually handle the request.
-        response = self.handler(request)
+        try:
+            response = self.handler(request)
+        except Exception:
+            # Extract the information and re-raise.
+            body = self.get_body(request)
+            self.log_request(request_id, path, headers, body)
+            raise
 
         # Then if the request was interesting and resulted in
         # an error response, then spawn a green thread to log
