@@ -84,9 +84,10 @@ class RequestLoggerTweenFactory(object):
         try:
             response = self.handler(request)
         except Exception:
-            # Extract the information and re-raise.
-            body = self.get_body(request)
-            self.log_request(request_id, path, headers, body)
+            # Extract the information if needed and and re-raise.
+            if should_log_exc:
+                body = self.get_body(request)
+                self.log_request(request_id, path, headers, body)
             raise
 
         # Then if the request was interesting and resulted in
